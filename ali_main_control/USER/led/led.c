@@ -26,9 +26,21 @@ void LED_GPIO_Config(void)
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 	//调用库函数，初始化GPIO
 	GPIO_Init(GLED_PORT, &GPIO_InitStructure);
-
- 	GLED_OFF;
+	GLED_OFF;
 	Gled_Num = 1;
+
+	//使能GPIOC的外设时钟
+	RCC_APB2PeriphClockCmd(RLED_RCC,ENABLE);
+	//选择要用的GPIO引脚		
+	GPIO_InitStructure.GPIO_Pin = RLED_IO	;
+	///设置引脚模式为推免输出模式			 
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 
+	//设置引脚速度为50MHZ
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
+	//调用库函数，初始化GPIO
+	GPIO_Init(RLED_PORT, &GPIO_InitStructure);
+ 	RLED_OFF;
+// 	Rled_Num = 1;
 }
 
 //=============================================================================
@@ -76,7 +88,7 @@ static void Rled_Flash(void )
 			   led_state = 0;
 			}else{
 			   RLED_OFF;
-			   Rled_Num--;
+// 			   Rled_Num--;
 			   led_state = 1;
 			}
 			retry = 50;

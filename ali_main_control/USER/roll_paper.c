@@ -38,28 +38,28 @@ void Roll_Paper_Control(void)
 //		  COMMUNICATION_IO1_ON;
 	}else if(Device_State == 2){
 			ROLL_PAPER_OFF;
-		  AIR_CYLINDER_UP;
-		  AIR_BLOW_OFF;
-		  VACUUM_OFF;
+// 		  AIR_CYLINDER_UP;
+// 		  AIR_BLOW_OFF;
+// 		  VACUUM_OFF;
 			belt.state = END ;     //‘À ‰∆§¥¯Õ£÷π
-			param_init();
+// 			param_init();
 	}else if(Device_State == 3){
-			Printer.complete = 0;
-			Printer.process = PRINTER_RESERVE;
-			PRINTER_START_OFF;
-      PRINTER_RESTART_OFF;
-		  Air_Control.process = RESERVE;
-			belt.state = END ;     //‘À ‰∆§¥¯Õ£÷π
-		  AIR_BLOW_OFF;
-		  VACUUM_OFF;
+// 			Printer.complete = 0;
+// 			Printer.process = PRINTER_RESERVE;
+// 			PRINTER_START_OFF;
+//       PRINTER_RESTART_OFF;
+// 		  Air_Control.process = RESERVE;
+// 			belt.state = END ;     //‘À ‰∆§¥¯Õ£÷π
+// 		  AIR_BLOW_OFF;
+// 		  VACUUM_OFF;
 //		  COMMUNICATION_IO1_OFF;
 		}else{
       ROLL_PAPER_ON;
 			belt.state = END ;     //‘À ‰∆§¥¯Õ£÷π
-			param_init();
-			if(READ_UPPER_REACH==0){
-				AIR_CYLINDER_UP;
-		  }
+// 			param_init();
+// 			if(READ_UPPER_REACH==0){
+// 				AIR_CYLINDER_UP;
+// 		  }
 	}
 
 }

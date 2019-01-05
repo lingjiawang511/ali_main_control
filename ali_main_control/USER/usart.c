@@ -7,10 +7,11 @@
 Usart_Type Usart1_Control_Data;
 Usart_Type Usart2_Control_Data;
 Usart_Type Usart3_Control_Data;
+Usart_Type Usart4_Control_Data;
 char Auto_Frame_Time1;
 char Auto_Frame_Time2;
 char Auto_Frame_Time3;
-
+char Auto_Frame_Time4;
 
 
 //=============================================================================
@@ -59,6 +60,22 @@ static void Init_USART3(void)
     Usart3_Control_Data.rx_count = 0;
     Usart3_Control_Data.rx_start = 0;
     Usart3_Control_Data.rx_aframe = 0;
+    
+}
+//=============================================================================
+//函数名称:Init_USART4
+//功能概要:USART4 初始化串口相关参数
+//参数说明:无
+//函数返回:无
+//=============================================================================
+static void Init_USART4(void)
+{
+    Usart4_Control_Data.tx_index = 0;
+    Usart4_Control_Data.rx_index = 0;
+    Usart4_Control_Data.tx_count = 0;
+    Usart4_Control_Data.rx_count = 0;
+    Usart4_Control_Data.rx_start = 0;
+    Usart4_Control_Data.rx_aframe = 0;
     
 }
 //=============================================================================
@@ -116,6 +133,24 @@ static void USART3_Interrupts_Config(void)
      NVIC_Init(&NVIC_InitStructure);
 }
 //=============================================================================
+//函数名称:USART4_Interrupts_Config
+//功能概要:USART4 中断优先级配置
+//参数说明:无
+//函数返回:无
+//=============================================================================
+static void USART4_Interrupts_Config(void)
+{
+     NVIC_InitTypeDef NVIC_InitStructure; 
+    
+     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); 
+    
+     NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQn;
+     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;
+     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+     NVIC_Init(&NVIC_InitStructure);
+}
+//=============================================================================
 //函数名称:USART1_Config
 //功能概要:USART1 初始化配置,工作模式配置。57600 8-N-1
 //参数说明:无
@@ -146,7 +181,7 @@ void USART1_Config(void )
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
   GPIO_Init(GPIOB, &GPIO_InitStructure);
   
-  USART_InitStructure.USART_BaudRate = 19200; //波特率
+  USART_InitStructure.USART_BaudRate = 115200; //波特率
   USART_InitStructure.USART_WordLength = USART_WordLength_8b; //数据位8位
   USART_InitStructure.USART_StopBits = USART_StopBits_1;	//停止位1位
   USART_InitStructure.USART_Parity = USART_Parity_No;		//校验位 无
@@ -187,7 +222,7 @@ void USART1_Config(void)
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
 
 	//USART初始化
-	USART_InitStructure.USART_BaudRate = 19200;
+	USART_InitStructure.USART_BaudRate = 115200;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
 	USART_InitStructure.USART_Parity = USART_Parity_No ;
@@ -232,7 +267,7 @@ void USART2_Config(void)
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
     
 
-	USART_InitStructure.USART_BaudRate = 19200; 			 
+	USART_InitStructure.USART_BaudRate = 115200; 			 
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;	   
 	USART_InitStructure.USART_Parity = USART_Parity_No; 	  
@@ -250,8 +285,8 @@ void USART2_Config(void)
 
 }
 //=============================================================================
-//函数名称:USART1_Config
-//功能概要:USART1 初始化配置,工作模式配置。57600 8-N-1
+//函数名称:USART3_Config
+//功能概要:USART3 初始化配置,工作模式配置。57600 8-N-1
 //参数说明:无
 //函数返回:无
 //=============================================================================
@@ -277,7 +312,7 @@ void USART3_Config(void )
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
 	GPIO_Init(GPIOB, &GPIO_InitStructure);
       
-	USART_InitStructure.USART_BaudRate = 19200; 			 
+	USART_InitStructure.USART_BaudRate = 9600; 			 
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;	   
 	USART_InitStructure.USART_Parity = USART_Parity_No; 	  
@@ -292,6 +327,50 @@ void USART3_Config(void )
 	USART_Cmd(USART3, ENABLE);
 	USART3_Interrupts_Config();
 	Init_USART3();
+}
+//=============================================================================
+//函数名称:USART1_Config
+//功能概要:USART1 初始化配置,工作模式配置。57600 8-N-1
+//参数说明:无
+//函数返回:无
+//=============================================================================
+
+
+void USART4_Config(void )
+{	
+  
+	GPIO_InitTypeDef GPIO_InitStructure;
+	USART_InitTypeDef USART_InitStructure;
+
+	/* Enable the USART3 Pins Software Remapping */
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC , ENABLE);
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE); 
+
+	/* Configure USART3 Tx (PC .10) as alternate function push-pull */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+	/* Configure USART3 Rx (PB.11) as input floating */
+	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_11;	  
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+	GPIO_Init(GPIOC, &GPIO_InitStructure);
+      
+	USART_InitStructure.USART_BaudRate = 9600; 			 
+	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+	USART_InitStructure.USART_StopBits = USART_StopBits_1;	   
+	USART_InitStructure.USART_Parity = USART_Parity_No; 	  
+	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;  
+
+	USART_Init(UART4, &USART_InitStructure);
+	USART_ITConfig(UART4, USART_IT_RXNE, ENABLE);
+	USART_ITConfig(UART4, USART_IT_TC, ENABLE);
+	USART_ClearFlag(UART4,USART_FLAG_TC);
+	/* Enable UART4 */
+	USART_Cmd(UART4, ENABLE);
+	USART4_Interrupts_Config();
+	Init_USART4();
 }
 //=============================================================================
 //函数名称:fputc
@@ -442,6 +521,23 @@ void USART3_Do_Tx(void )
     }
 }
 //=============================================================================
+//函数名称:USART4_Do_Tx
+//功能概要:将串口二的数据发送出去，通过中断发送
+//参数说明:无
+//函数返回:无
+//注意    :无
+//=============================================================================
+void USART4_Do_Tx(void )
+{
+    if (Usart4_Control_Data.tx_index < Usart4_Control_Data.tx_count) {
+		USART_SendData(UART4, Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_index]);
+		Usart4_Control_Data.tx_index++;
+	}else{
+       Usart4_Control_Data.tx_count = 0; 
+       Usart4_Control_Data.tx_index = 0;	   
+    }
+}
+//=============================================================================
 //函数名称:USART1_Do_Rx
 //功能概要:处理串口一接收的数据
 //参数说明:无
@@ -570,7 +666,45 @@ void USART3_Do_Rx(u8 rxdata)
         return;
     }           
 }
-
+//=============================================================================
+//函数名称:USART4_Do_Rx
+//功能概要:处理串口二接收的数据
+//参数说明:无
+//函数返回:无
+//注意    :无
+//=============================================================================
+void USART4_Do_Rx(u8 rxdata)
+{       
+    if (0 == Usart4_Control_Data.rx_aframe){
+       if (0 == Usart4_Control_Data.rx_index){  //接收第一帧的第一个数据开启定时器3做时间自动成帧处理
+           Usart4_Control_Data.rx_start = 1;
+           Auto_Frame_Time4 = AUTO_FRAME_TIMEOUT4; 
+       }else {
+            if (Auto_Frame_Time4 <=0){   //时间超时自动成帧
+               Usart4_Control_Data.rx_aframe = 1; 
+               Usart4_Control_Data.rx_start = 0;
+               Usart4_Control_Data.rx_count = Usart4_Control_Data.rx_index;
+               Usart4_Control_Data.rx_index = 0;   //得到一帧数据后及时把索引清零
+               return ;   //直接返回不接受数据              
+            }                    
+        }
+				Auto_Frame_Time4 = AUTO_FRAME_TIMEOUT4;
+       	Usart4_Control_Data.rxbuf[Usart4_Control_Data.rx_index] = rxdata;
+        Usart4_Control_Data.rx_index++;
+        if (Usart4_Control_Data.rx_index > (RxBufMax - 1)){
+            Usart4_Control_Data.rx_index = (RxBufMax - 1);
+            Usart4_Control_Data.rx_aframe = 1;  //接收数据长度自动成帧
+            Usart4_Control_Data.rx_count = Usart4_Control_Data.rx_index+1;
+            Usart4_Control_Data.rx_index = 0;   //得到一帧数据后及时把索引清零
+            Usart4_Control_Data.rx_start = 0;
+            Auto_Frame_Time4 = AUTO_FRAME_TIMEOUT4; 
+        }   
+    }else{  //接收到一帧数据后必须处理完才可以继续接受下一帧数据
+       Usart4_Control_Data.rx_start = 0;
+       Auto_Frame_Time4 = AUTO_FRAME_TIMEOUT4; 
+        return;
+    }           
+}
 
 ////=============================================================================
 ////函数名称:SLAVE_Rec_Comm

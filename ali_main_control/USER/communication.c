@@ -61,10 +61,10 @@ static u8  SLAVE_Rec_Comm(void)
 		switch(MCU_Host_Rec.control.scanner_result){
 		case 0x00: 
 							break;
-		case 0x01:Baffle_Control.scanner_result_old=Baffle_Control.PC_send_scanner_result = MCU_Host_Rec.control.scanner_result;
-							break;
-		case 0x02:Baffle_Control.scanner_result_old=Baffle_Control.PC_send_scanner_result = MCU_Host_Rec.control.scanner_result;
-							break;
+// 		case 0x01:Baffle_Control.scanner_result_old=Baffle_Control.PC_send_scanner_result = MCU_Host_Rec.control.scanner_result;
+// 							break;
+// 		case 0x02:Baffle_Control.scanner_result_old=Baffle_Control.PC_send_scanner_result = MCU_Host_Rec.control.scanner_result;
+// 							break;
 		default :
 							break;
 		}
@@ -102,54 +102,54 @@ static u8  SLAVE_Rec_Comm(void)
 		switch(MCU_Host_Rec.control.printer_fix){
 		case 0x00:	 
 							break;
-		case 0x01:Air_Control.PC_send_delay_time = (MCU_Host_Rec.control.printer_delay_H*256+MCU_Host_Rec.control.printer_delay_L+2)/5;//上位机发的时间是1ms，单片机捕捉的时间是5MS，下一个周期生效
-							if(Air_Control.PC_send_delay_time >= 600){
-									Air_Control.PC_send_delay_time = 600;
-							}else if(Air_Control.PC_send_delay_time <= 200){
-									Air_Control.PC_send_delay_time = 200;
-							}
-							break;
+// 		case 0x01:Air_Control.PC_send_delay_time = (MCU_Host_Rec.control.printer_delay_H*256+MCU_Host_Rec.control.printer_delay_L+2)/5;//上位机发的时间是1ms，单片机捕捉的时间是5MS，下一个周期生效
+// 							if(Air_Control.PC_send_delay_time >= 600){
+// 									Air_Control.PC_send_delay_time = 600;
+// 							}else if(Air_Control.PC_send_delay_time <= 200){
+// 									Air_Control.PC_send_delay_time = 200;
+// 							}
+// 							break;
 		case 0x02:break;
 		default : break;
 		}
 		switch(MCU_Host_Rec.control.baffle_fix){
 		case 0x00:	 
 							break;
-		case 0x01:Baffle_Control.PC_send_process_time = (MCU_Host_Rec.control.baffle_delay_H*256+MCU_Host_Rec.control.baffle_delay_L+2)/5;
-							if(Baffle_Control.PC_send_process_time >= 400){
-									Baffle_Control.PC_send_process_time = 300;
-							}else if(Baffle_Control.PC_send_process_time <= 200){
-									Baffle_Control.PC_send_process_time = 300;
-							}
-							break;
+// 		case 0x01:Baffle_Control.PC_send_process_time = (MCU_Host_Rec.control.baffle_delay_H*256+MCU_Host_Rec.control.baffle_delay_L+2)/5;
+// 							if(Baffle_Control.PC_send_process_time >= 400){
+// 									Baffle_Control.PC_send_process_time = 300;
+// 							}else if(Baffle_Control.PC_send_process_time <= 200){
+// 									Baffle_Control.PC_send_process_time = 300;
+// 							}
+// 							break;
 		default : break;
 		}
 		switch(MCU_Host_Rec.control.check_state){
 		case 0x00:	
 							break;
-		case 0x01: 
-		           MCU_Host_Send.control.crc_result = 1;
-							 MCU_Host_Send.control.scanner_result = Baffle_Control.scanner_result_old;
-							 MCU_Host_Send.control.device_state = Device_State;
-							 if(Printer.input_state == 1){
-									MCU_Host_Send.control.printer_state = 1;
-							 }else{
-                  MCU_Host_Send.control.printer_state = 2;
-							}
-							if((Baffle_Control.bag_input_flag == 1)||(Control.scanner.state == 1)){
-								if(Baffle_Control.PC_send_scanner_result==1){
-									MCU_Host_Send.control.recom_state = 1;
-								}else{
-									MCU_Host_Send.control.recom_state = 2;
-								}
-							}else{
-								if(Baffle_Control.PC_send_scanner_result >=1){
-									MCU_Host_Send.control.recom_state = 3;
-								}else{
-									MCU_Host_Send.control.recom_state = 0;
-								}
-							}
-							break;
+// 		case 0x01: 
+// 		           MCU_Host_Send.control.crc_result = 1;
+// 							 MCU_Host_Send.control.scanner_result = Baffle_Control.scanner_result_old;
+// 							 MCU_Host_Send.control.device_state = Device_State;
+// 							 if(Printer.input_state == 1){
+// 									MCU_Host_Send.control.printer_state = 1;
+// 							 }else{
+//                   MCU_Host_Send.control.printer_state = 2;
+// 							}
+// 							if((Baffle_Control.bag_input_flag == 1)||(Control.scanner.state == 1)){
+// 								if(Baffle_Control.PC_send_scanner_result==1){
+// 									MCU_Host_Send.control.recom_state = 1;
+// 								}else{
+// 									MCU_Host_Send.control.recom_state = 2;
+// 								}
+// 							}else{
+// 								if(Baffle_Control.PC_send_scanner_result >=1){
+// 									MCU_Host_Send.control.recom_state = 3;
+// 								}else{
+// 									MCU_Host_Send.control.recom_state = 0;
+// 								}
+// 							}
+// 							break;
 		case 0x02:
 							break;
 		default : 
@@ -168,7 +168,7 @@ static u8  SLAVE_Rec_Comm(void)
 	{
 		 if(MCU_Host_Rec.control.check_state == 1){
 				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x01;
-				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = Baffle_Control.scanner_result_old;
+				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0;
 				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = MCU_Host_Send.control.device_state;
 				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = MCU_Host_Send.control.printer_state;
 				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = MCU_Host_Send.control.recom_state;
@@ -288,16 +288,65 @@ static u8 Execute_Host_Comm(void)
 //函数返回:无
 //注意    :无
 //=============================================================================
-void Respond_Host_Comm(void)
+void Communication_Process(void)
 {
     if (1 == Usart1_Control_Data.rx_aframe){    
 				Execute_Host_Comm();		
 				Usart1_Control_Data.rx_count = 0;
 				Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
 				Usart1_Control_Data.rx_aframe = 0;
-    }else{
-        return;
+			
+				Usart1_Control_Data.tx_count = 0;
+				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x01;
+				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x58;
+				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
+				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x06;			
+				Usart1_Control_Data.tx_index = 0;
+				USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
     }
+	  if (1 == Usart2_Control_Data.rx_aframe){    
+	
+				Usart2_Control_Data.rx_count = 0;
+				Auto_Frame_Time2 = AUTO_FRAME_TIMEOUT2;
+				Usart2_Control_Data.rx_aframe = 0;
+			
+			  Usart2_Control_Data.tx_count = 0;
+				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = 0x01;
+				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = 0x58;
+				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = 0x00;
+				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = 0x06;			
+				Usart2_Control_Data.tx_index = 0;
+				USART_SendData(USART2,Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_index++]);
+    }
+		if (1 == Usart3_Control_Data.rx_aframe){    
+	
+				Usart3_Control_Data.rx_count = 0;
+				Auto_Frame_Time3 = AUTO_FRAME_TIMEOUT3;
+				Usart3_Control_Data.rx_aframe = 0;
+			
+				Usart3_Control_Data.tx_count = 0;
+				Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x01;
+				Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x58;
+				Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x00;
+				Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x06;			
+				Usart3_Control_Data.tx_index = 0;
+				USART_SendData(USART3,Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_index++]);
+    }
+	  if (1 == Usart4_Control_Data.rx_aframe){    
+	
+				Usart4_Control_Data.rx_count = 0;
+				Auto_Frame_Time4 = AUTO_FRAME_TIMEOUT4;
+				Usart4_Control_Data.rx_aframe = 0;
+			
+				Usart4_Control_Data.tx_count = 0;
+				Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x01;
+				Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x58;
+				Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x00;
+				Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x06;			
+				Usart4_Control_Data.tx_index = 0;
+				USART_SendData(UART4,Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_index++]);
+    }
+		
 }
 
 

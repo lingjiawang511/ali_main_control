@@ -47,6 +47,7 @@ typedef uint32	ulong;		/**< 32-bit value */
 #define AUTO_FRAME_TIMEOUT1  10  //10*2ms
 #define AUTO_FRAME_TIMEOUT2  10  //10*2ms
 #define AUTO_FRAME_TIMEOUT3  10  //10*2ms
+#define AUTO_FRAME_TIMEOUT4  10  //10*2ms
 /*自动成帧超时定时时间*/
 //响应超时时间，即上位机确认二维码正确后扫描枪一直扫描直到得到下一次数据的最长时间
 #define ANSWER_SCANTIME	 	 4000	  //4000*5ms
@@ -273,8 +274,15 @@ typedef struct{
 
 /*************extern variable start*******************/
 extern char Auto_Frame_Time1;
+extern char Auto_Frame_Time2;
+extern char Auto_Frame_Time3;
+extern char Auto_Frame_Time4;
 
 extern  Usart_Type Usart1_Control_Data;
+extern  Usart_Type Usart2_Control_Data;
+extern  Usart_Type Usart3_Control_Data;
+extern  Usart_Type Usart4_Control_Data;
+
 
 extern  COMM_Send_Union_Type PC_Host_Rec;
 extern  COMM_Rec_Union_Type  PC_Hosr_Send;

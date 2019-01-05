@@ -150,35 +150,13 @@ void TIM2_IRQHandler(void)
 		Led_Flash();
 		Belt_Control();
 		Key_Light_Dispose();
-		Baffle_Time_Irq();
-		if(Printer.start_delay_time > 0){
-			Printer.start_delay_time--;
-		}else{
-			PRINTER_START_OFF;   
-			Printer.start_delay_time = 0;
-		}
+
     if(uiRoll_Paper_ON_Delay > 0){
       uiRoll_Paper_ON_Delay--;
     }else{
       PRINTER_RESTART_OFF;
     }
-		if(Air_Control.delay_time > 0){
-			Air_Control.delay_time--;
-		}
-		if(Printer.fluid_bag_timeout>0){
-			Printer.fluid_bag_timeout--;
-		}else{
-			Control.fluid_bag.state = 0;
-		}
-		if(Air_Control.air_cylinder_dowm_timeout > 0){
-			Air_Control.air_cylinder_dowm_timeout --;
-		}
-		if(Air_Control.air_cylinder_up_timeout > 0){
-			Air_Control.air_cylinder_up_timeout --;
-		}
-		if(Printer.printer_work_timeout > 0){
-			Printer.printer_work_timeout--;
-		}
+
 		TIM_ClearITPendingBit(TIM2 , TIM_FLAG_Update);  		 
 	}		 	
 }
@@ -201,6 +179,39 @@ void TIM3_IRQHandler(void)
                 Usart1_Control_Data.rx_count = Usart1_Control_Data.rx_index;
                 Usart1_Control_Data.rx_start = 0;
                 Usart1_Control_Data.rx_index = 0;
+            }
+        }
+				if (1 == Usart2_Control_Data.rx_start){
+            if(Auto_Frame_Time2 >0){
+                Auto_Frame_Time2--;
+            }else{
+                Auto_Frame_Time2 = 0;
+                Usart2_Control_Data.rx_aframe = 1; 
+                Usart2_Control_Data.rx_count = Usart3_Control_Data.rx_index;
+                Usart2_Control_Data.rx_start = 0;
+                Usart2_Control_Data.rx_index = 0;
+            }
+        }
+				if (1 == Usart3_Control_Data.rx_start){
+            if(Auto_Frame_Time3 >0){
+                Auto_Frame_Time3--;
+            }else{
+                Auto_Frame_Time3 = 0;
+                Usart3_Control_Data.rx_aframe = 1; 
+                Usart3_Control_Data.rx_count = Usart3_Control_Data.rx_index;
+                Usart3_Control_Data.rx_start = 0;
+                Usart3_Control_Data.rx_index = 0;
+            }
+        }
+				if (1 == Usart4_Control_Data.rx_start){
+            if(Auto_Frame_Time4 >0){
+                Auto_Frame_Time4--;
+            }else{
+                Auto_Frame_Time4 = 0;
+                Usart4_Control_Data.rx_aframe = 1; 
+                Usart4_Control_Data.rx_count = Usart4_Control_Data.rx_index;
+                Usart4_Control_Data.rx_start = 0;
+                Usart4_Control_Data.rx_index = 0;
             }
         }
 			Input_pulse_IRQTimer();    //所有通道电机脉冲计数
@@ -226,6 +237,59 @@ void USART1_IRQHandler(void)
        USART_ClearFlag(USART1,USART_FLAG_TC);
 	}
 }
-
+//=============================================================================
+//函数名称:USART2_IRQHandler
+//功能概要:USART2 中断函数
+//参数说明:无
+//函数返回:无
+//=============================================================================
+void USART2_IRQHandler(void)
+{
+  
+	if(USART_GetFlagStatus(USART2, USART_FLAG_RXNE)||USART_GetFlagStatus(USART2, USART_FLAG_ORE) != RESET){ //解决数据没接收完一直进中断的问题
+       USART2_Do_Rx(USART_ReceiveData(USART1));
+       USART_ClearFlag(USART2,USART_FLAG_RXNE);
+	}
+	if(USART_GetFlagStatus(USART2, USART_FLAG_TC)){
+       USART2_Do_Tx();
+       USART_ClearFlag(USART2,USART_FLAG_TC);
+	}
+}
+//=============================================================================
+//函数名称:USART3_IRQHandler
+//功能概要:USART3 中断函数
+//参数说明:无
+//函数返回:无
+//=============================================================================
+void USART3_IRQHandler(void)
+{
+  
+	if(USART_GetFlagStatus(USART3, USART_FLAG_RXNE)||USART_GetFlagStatus(USART3, USART_FLAG_ORE) != RESET){ //解决数据没接收完一直进中断的问题
+       USART3_Do_Rx(USART_ReceiveData(USART3));
+       USART_ClearFlag(USART3,USART_FLAG_RXNE);
+	}
+	if(USART_GetFlagStatus(USART3, USART_FLAG_TC)){
+       USART3_Do_Tx();
+       USART_ClearFlag(USART3,USART_FLAG_TC);
+	}
+}
+//=============================================================================
+//函数名称:USART1_IRQHandler
+//功能概要:USART1 中断函数
+//参数说明:无
+//函数返回:无
+//=============================================================================
+void UART4_IRQHandler(void)
+{
+  
+	if(USART_GetFlagStatus(UART4, USART_FLAG_RXNE)||USART_GetFlagStatus(UART4, USART_FLAG_ORE) != RESET){ //解决数据没接收完一直进中断的问题
+       USART4_Do_Rx(USART_ReceiveData(UART4));
+       USART_ClearFlag(UART4,USART_FLAG_RXNE);
+	}
+	if(USART_GetFlagStatus(UART4, USART_FLAG_TC)){
+       USART4_Do_Tx();
+       USART_ClearFlag(UART4,USART_FLAG_TC);
+	}
+}
 
 

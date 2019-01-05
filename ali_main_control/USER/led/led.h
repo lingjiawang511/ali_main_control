@@ -3,12 +3,12 @@
 
 #include "stm32f10x.h"
 
-#define				GLED_IO					GPIO_Pin_1
-#define				GLED_PORT			  GPIOA
-#define				GLED_RCC				RCC_APB2Periph_GPIOA
-#define				RLED_IO					GPIO_Pin_0
-#define				RLED_PORT				GPIOA
-#define				RLED_RCC			  RCC_APB2Periph_GPIOA
+#define				GLED_IO					GPIO_Pin_5
+#define				GLED_PORT			  GPIOB
+#define				GLED_RCC				RCC_APB2Periph_GPIOB
+#define				RLED_IO					GPIO_Pin_13
+#define				RLED_PORT				GPIOC
+#define				RLED_RCC			  RCC_APB2Periph_GPIOC
 
 #define       GLED_OFF   			GPIO_SetBits(GLED_PORT, GLED_IO)
 #define       GLED_ON  				GPIO_ResetBits(GLED_PORT, GLED_IO)

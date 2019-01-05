@@ -189,133 +189,133 @@ static void  EXTIX15_10_Init(void )
   	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;								//使能外部中断通道
   	NVIC_Init(&NVIC_InitStructure);
 }
-//=============================================================================
-//函数名称:Control_Input_IRQTimer
-//功能概要:
-//参数名称:无
-//函数返回:无
-//注意    :无
-//=============================================================================
-static void 	Control_Input_IRQTimer(void)
-{
-		if(Control.scanner.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
-					Control.scanner.irqtime++;
-					if((IRQ_TIMEOUT*1) <= Control.scanner.irqtime){
-						if(READ_SCANNER == RESET){
-							Control.scanner.state = 1;
-						}
-						Control.scanner.irqstate = 0;
-						Control.scanner.irqtime = 0;
-					}
-		}
-		if(Control.fluid_bag.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
-					Control.fluid_bag.irqtime++;
-					if(IRQ_TIMEOUT*1 <= Control.fluid_bag.irqtime){
-						if(READ_FLUID_BAG == RESET){
-							Control.fluid_bag.state = 1;
-//							COMMUNICATION_IO2_ON;			//和CPU2通讯，告诉COU2有液袋输入
-							Printer.fluid_bag_timeout = 600;  //打印机打印超时时间，故障时间，主要是由于气缸压下时不到位导致的故障
-							if(Air_Control.delay_time == 0){
-								Air_Control.delay_time = Air_Control.PC_send_delay_time;   //以后要改成可变的时间  
-//								Air_Control.delay_time = 0;   //以后要改成可变的时间  
-							}
-						}
-						Control.fluid_bag.irqstate = 0;
-						Control.fluid_bag.irqtime = 0;
-					}
-		}
-		if(Control.upper_reach.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
-					Control.upper_reach.irqtime++;
-					if(IRQ_TIMEOUT <= Control.upper_reach.irqtime){
-						if(READ_UPPER_REACH == RESET){
-							Control.upper_reach.state = 1;
-						}
-						Control.upper_reach.irqstate = 0;
-						Control.upper_reach.irqtime = 0;
-					}
-		}
-		if(Control.fit_reach.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
-					Control.fit_reach.irqtime++;
-					if(IRQ_TIMEOUT <= Control.fit_reach.irqtime){
-						if(READ_FIT_REACH == RESET){
-							Control.fit_reach.state = 1;
-						}
-						Control.fit_reach.irqstate = 0;
-						Control.fit_reach.irqtime = 0;
-					}
-		}
-		
-}
-//=============================================================================
-//函数名称:Printer_Input_IRQTimer
-//功能概要:打印机输入状态计数脉冲软件延时检测
-//参数名称:无
-//函数返回:无
-//注意    :无
-//=============================================================================
-static void 	Printer_Input_IRQTimer(void)
-{
-		if(Printer.color_less.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
-					Printer.color_less.irqtime++;
-					if(IRQ_TIMEOUT <= Printer.color_less.irqtime){
-						if(READ_PRINTER_COLESS == RESET){
-							Printer.color_less.state = 1;
-						}
-						Printer.color_less.irqstate = 0;
-						Printer.color_less.irqtime = 0;
-					}
-		}
-		if(Printer.pinline.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
-					Printer.pinline.irqtime++;
-					if(IRQ_TIMEOUT <= Printer.pinline.irqtime){
-						if(READ_PRINTER_INLINE == RESET){
-							Printer.pinline.state = 1;
-						}
-						Printer.pinline.irqstate = 0;
-						Printer.pinline.irqtime = 0;
-					}
-		}
-		if(Printer.color_end.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
-					Printer.color_end.irqtime++;
-					if(IRQ_TIMEOUT <= Printer.color_end.irqtime){
-						if(READ_PRINTER_COEND == RESET){
-							Printer.color_end.state = 1;
-						}
-						Printer.color_end.irqstate = 0;
-						Printer.color_end.irqtime = 0;
-					}
-		}
-		if(Printer.err.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
-					Printer.err.irqtime++;
-					if(IRQ_TIMEOUT <= Printer.err.irqtime){
-						if(READ_PRINTER_ERR == RESET){
-							Printer.err.state = 1;
-						}
-						Printer.err.irqstate = 0;
-						Printer.err.irqtime = 0;
-					}
-		}
-		if(Printer.end.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
-					Printer.end.irqtime++;
-					if(IRQ_TIMEOUT <= Printer.end.irqtime){
-						if(READ_PRINTER_END == RESET){
-							Printer.end.state = 1;
-						}
-						Printer.end.irqstate = 0;
-						Printer.end.irqtime = 0;
-					}
-		}
-		if(Printer.tag_end.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
-					Printer.tag_end.irqtime++;
-					if(IRQ_TIMEOUT <= Printer.tag_end.irqtime){
-						if(READ_PRINTER_TAGEND == RESET){
-							Printer.tag_end.state = 1;
-						}
-						Printer.tag_end.irqstate = 0;
-						Printer.tag_end.irqtime = 0;
-					}
-		}
-}
+// //=============================================================================
+// //函数名称:Control_Input_IRQTimer
+// //功能概要:
+// //参数名称:无
+// //函数返回:无
+// //注意    :无
+// //=============================================================================
+// static void 	Control_Input_IRQTimer(void)
+// {
+// 		if(Control.scanner.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
+// 					Control.scanner.irqtime++;
+// 					if((IRQ_TIMEOUT*1) <= Control.scanner.irqtime){
+// 						if(READ_SCANNER == RESET){
+// 							Control.scanner.state = 1;
+// 						}
+// 						Control.scanner.irqstate = 0;
+// 						Control.scanner.irqtime = 0;
+// 					}
+// 		}
+// 		if(Control.fluid_bag.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
+// 					Control.fluid_bag.irqtime++;
+// 					if(IRQ_TIMEOUT*1 <= Control.fluid_bag.irqtime){
+// 						if(READ_FLUID_BAG == RESET){
+// 							Control.fluid_bag.state = 1;
+// //							COMMUNICATION_IO2_ON;			//和CPU2通讯，告诉COU2有液袋输入
+// 							Printer.fluid_bag_timeout = 600;  //打印机打印超时时间，故障时间，主要是由于气缸压下时不到位导致的故障
+// 							if(Air_Control.delay_time == 0){
+// 								Air_Control.delay_time = Air_Control.PC_send_delay_time;   //以后要改成可变的时间  
+// //								Air_Control.delay_time = 0;   //以后要改成可变的时间  
+// 							}
+// 						}
+// 						Control.fluid_bag.irqstate = 0;
+// 						Control.fluid_bag.irqtime = 0;
+// 					}
+// 		}
+// 		if(Control.upper_reach.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
+// 					Control.upper_reach.irqtime++;
+// 					if(IRQ_TIMEOUT <= Control.upper_reach.irqtime){
+// 						if(READ_UPPER_REACH == RESET){
+// 							Control.upper_reach.state = 1;
+// 						}
+// 						Control.upper_reach.irqstate = 0;
+// 						Control.upper_reach.irqtime = 0;
+// 					}
+// 		}
+// 		if(Control.fit_reach.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
+// 					Control.fit_reach.irqtime++;
+// 					if(IRQ_TIMEOUT <= Control.fit_reach.irqtime){
+// 						if(READ_FIT_REACH == RESET){
+// 							Control.fit_reach.state = 1;
+// 						}
+// 						Control.fit_reach.irqstate = 0;
+// 						Control.fit_reach.irqtime = 0;
+// 					}
+// 		}
+// 		
+// }
+// //=============================================================================
+// //函数名称:Printer_Input_IRQTimer
+// //功能概要:打印机输入状态计数脉冲软件延时检测
+// //参数名称:无
+// //函数返回:无
+// //注意    :无
+// //=============================================================================
+// static void 	Printer_Input_IRQTimer(void)
+// {
+// 		if(Printer.color_less.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
+// 					Printer.color_less.irqtime++;
+// 					if(IRQ_TIMEOUT <= Printer.color_less.irqtime){
+// 						if(READ_PRINTER_COLESS == RESET){
+// 							Printer.color_less.state = 1;
+// 						}
+// 						Printer.color_less.irqstate = 0;
+// 						Printer.color_less.irqtime = 0;
+// 					}
+// 		}
+// 		if(Printer.pinline.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
+// 					Printer.pinline.irqtime++;
+// 					if(IRQ_TIMEOUT <= Printer.pinline.irqtime){
+// 						if(READ_PRINTER_INLINE == RESET){
+// 							Printer.pinline.state = 1;
+// 						}
+// 						Printer.pinline.irqstate = 0;
+// 						Printer.pinline.irqtime = 0;
+// 					}
+// 		}
+// 		if(Printer.color_end.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
+// 					Printer.color_end.irqtime++;
+// 					if(IRQ_TIMEOUT <= Printer.color_end.irqtime){
+// 						if(READ_PRINTER_COEND == RESET){
+// 							Printer.color_end.state = 1;
+// 						}
+// 						Printer.color_end.irqstate = 0;
+// 						Printer.color_end.irqtime = 0;
+// 					}
+// 		}
+// 		if(Printer.err.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
+// 					Printer.err.irqtime++;
+// 					if(IRQ_TIMEOUT <= Printer.err.irqtime){
+// 						if(READ_PRINTER_ERR == RESET){
+// 							Printer.err.state = 1;
+// 						}
+// 						Printer.err.irqstate = 0;
+// 						Printer.err.irqtime = 0;
+// 					}
+// 		}
+// 		if(Printer.end.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
+// 					Printer.end.irqtime++;
+// 					if(IRQ_TIMEOUT <= Printer.end.irqtime){
+// 						if(READ_PRINTER_END == RESET){
+// 							Printer.end.state = 1;
+// 						}
+// 						Printer.end.irqstate = 0;
+// 						Printer.end.irqtime = 0;
+// 					}
+// 		}
+// 		if(Printer.tag_end.irqstate == 1){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真
+// 					Printer.tag_end.irqtime++;
+// 					if(IRQ_TIMEOUT <= Printer.tag_end.irqtime){
+// 						if(READ_PRINTER_TAGEND == RESET){
+// 							Printer.tag_end.state = 1;
+// 						}
+// 						Printer.tag_end.irqstate = 0;
+// 						Printer.tag_end.irqtime = 0;
+// 					}
+// 		}
+// }
 
 //=============================================================================
 //函数名称:EXTIX_Init
@@ -440,31 +440,31 @@ void EXTIX_Init(void)
 void EXTI9_5_IRQHandler(void)
 {
 if(EXTI_GetITStatus(EXTI_Line6) != RESET){
-			if(Control.scanner.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
-					Control.scanner.irqstate = 1;
-					Control.scanner.irqtime = 0;					
-			}
+// 			if(Control.scanner.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
+// 					Control.scanner.irqstate = 1;
+// 					Control.scanner.irqtime = 0;					
+// 			}
 		EXTI_ClearITPendingBit(EXTI_Line6);
 	}
 	if(EXTI_GetITStatus(EXTI_Line7) != RESET){
-			if(Control.fluid_bag.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
-					Control.fluid_bag.irqstate = 1;
-					Control.fluid_bag.irqtime = 0;					
-			}
+// 			if(Control.fluid_bag.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
+// 					Control.fluid_bag.irqstate = 1;
+// 					Control.fluid_bag.irqtime = 0;					
+// 			}
 		EXTI_ClearITPendingBit(EXTI_Line7);
 	}
 	if(EXTI_GetITStatus(EXTI_Line8) != RESET){
-			if(Control.upper_reach.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
-					Control.upper_reach.irqstate = 1;
-					Control.upper_reach.irqtime = 0;					
-			}
+// 			if(Control.upper_reach.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
+// 					Control.upper_reach.irqstate = 1;
+// 					Control.upper_reach.irqtime = 0;					
+// 			}
 		EXTI_ClearITPendingBit(EXTI_Line8);
 	}
 	if(EXTI_GetITStatus(EXTI_Line9) != RESET){
-			if(Control.fit_reach.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
-					Control.fit_reach.irqstate = 1;
-					Control.fit_reach.irqtime = 0;					
-			}
+// 			if(Control.fit_reach.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
+// 					Control.fit_reach.irqstate = 1;
+// 					Control.fit_reach.irqtime = 0;					
+// 			}
 		EXTI_ClearITPendingBit(EXTI_Line9);
 	}
 
@@ -479,45 +479,45 @@ if(EXTI_GetITStatus(EXTI_Line6) != RESET){
 void EXTI15_10_IRQHandler(void)
 {
 	if(EXTI_GetITStatus(EXTI_Line10) != RESET){
-			if(Printer.color_less.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
-					Printer.color_less.irqstate = 1;
-					Printer.color_less.irqtime = 0;					
-			}
+// 			if(Printer.color_less.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
+// 					Printer.color_less.irqstate = 1;
+// 					Printer.color_less.irqtime = 0;					
+// 			}
 		EXTI_ClearITPendingBit(EXTI_Line10);
 	}
 	if(EXTI_GetITStatus(EXTI_Line11) != RESET){
-			if(Printer.pinline.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
-					Printer.pinline.irqstate = 1;
-					Printer.pinline.irqtime = 0;					
-			}
+// 			if(Printer.pinline.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
+// 					Printer.pinline.irqstate = 1;
+// 					Printer.pinline.irqtime = 0;					
+// 			}
 		EXTI_ClearITPendingBit(EXTI_Line11);
 	}
 	if(EXTI_GetITStatus(EXTI_Line12) != RESET){
-			if(Printer.color_end.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
-					Printer.color_end.irqstate = 1;
-					Printer.color_end.irqtime = 0;					
-			}
+// 			if(Printer.color_end.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
+// 					Printer.color_end.irqstate = 1;
+// 					Printer.color_end.irqtime = 0;					
+// 			}
 		EXTI_ClearITPendingBit(EXTI_Line12);
 	}
 	if(EXTI_GetITStatus(EXTI_Line13) != RESET){
-			if(Printer.err.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
-					Printer.err.irqstate = 1;
-					Printer.err.irqtime = 0;					
-			}
+// 			if(Printer.err.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
+// 					Printer.err.irqstate = 1;
+// 					Printer.err.irqtime = 0;					
+// 			}
 		EXTI_ClearITPendingBit(EXTI_Line13);
 	}
 	if(EXTI_GetITStatus(EXTI_Line14) != RESET){
-			if(Printer.end.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
-					Printer.end.irqstate = 1;
-					Printer.end.irqtime = 0;					
-			}
+// 			if(Printer.end.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
+// 					Printer.end.irqstate = 1;
+// 					Printer.end.irqtime = 0;					
+// 			}
 		EXTI_ClearITPendingBit(EXTI_Line14);
 	}
 	if(EXTI_GetITStatus(EXTI_Line15) != RESET){
-			if(Printer.tag_end.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
-					Printer.tag_end.irqstate = 1;
-					Printer.tag_end.irqtime = 0;					
-			}
+// 			if(Printer.tag_end.irqstate == 0){//延时方法使用定时器延时，中断进来看状态，8MS后判断状态是否是真					
+// 					Printer.tag_end.irqstate = 1;
+// 					Printer.tag_end.irqtime = 0;					
+// 			}
 		EXTI_ClearITPendingBit(EXTI_Line15);
 	}
 }
@@ -530,8 +530,8 @@ void EXTI15_10_IRQHandler(void)
 //=============================================================================
 void 	Input_pulse_IRQTimer(void)
 {
-	Control_Input_IRQTimer();
-	Printer_Input_IRQTimer();
+// 	Control_Input_IRQTimer();
+// 	Printer_Input_IRQTimer();
 }
 
 

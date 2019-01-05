@@ -1,12 +1,12 @@
 #include"HeadType.h"	
 
 
-#define	START_KEY_IO					GPIO_Pin_6
-#define	START_KEY_PORT				GPIOA
-#define	START_KEY_RCC				  RCC_APB2Periph_GPIOA
-#define	STOP_KEY_IO					  GPIO_Pin_5
-#define	STOP_KEY_PORT				  GPIOA
-#define	STOP_KEY_RCC				  RCC_APB2Periph_GPIOA
+#define	START_KEY_IO					GPIO_Pin_9
+#define	START_KEY_PORT				GPIOC
+#define	START_KEY_RCC				  RCC_APB2Periph_GPIOC
+#define	STOP_KEY_IO					  GPIO_Pin_8
+#define	STOP_KEY_PORT				  GPIOC
+#define	STOP_KEY_RCC				  RCC_APB2Periph_GPIOC
  
 #define READ_START_KEY    		GPIO_ReadInputDataBit(START_KEY_PORT,START_KEY_IO) //返回的是一个字节，读的是一个位
 #define READ_STOP_KEY    		  GPIO_ReadInputDataBit(STOP_KEY_PORT,STOP_KEY_IO) //返回的是一个字节，读的是一个位
@@ -207,7 +207,7 @@ static void Light_Scan(void)
 void Key_Light_Init(void)
 {
 		KEY_GPIO_Config();
-		Light_GPIO_Config();
+// 		Light_GPIO_Config();
 }
 
 void Key_Light_Dispose(void)
@@ -233,7 +233,7 @@ void Key_Light_Dispose(void)
 		}
 		Key_ScanNum = 0;
 	}
-	Light_Scan();
+// 	Light_Scan();
 }
 
 
