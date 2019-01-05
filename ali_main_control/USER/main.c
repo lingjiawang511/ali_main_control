@@ -4,9 +4,9 @@
 #include "sht1x.h"
 
 Belt_Work_Type belt;
- Printer_Type Printer;
- Control_Input_Type Control;
-
+Printer_Type Printer;
+Control_Input_Type Control;
+tag_param param = {0};
 void delay_ms1(u16 ms)
 {
 	u16  i;
@@ -17,7 +17,12 @@ void delay_ms1(u16 ms)
 		;
 	}
 }
-tag_param param = {0};
+void read_RH(void)
+{
+	if(fsm_cpl == (*(read_sensor_hook))(&param)) {
+
+	}
+}
 //配置时钟在target宏定义
 int main(void)
 {
@@ -25,7 +30,7 @@ int main(void)
 		Key_Light_Init();
 // 		Belt_Config();
 		LED_GPIO_Config();
-	 sensor_init_sht1x(NULL);
+	  sensor_init_sht1x();
 // 		EXTIX_Init();
     USART1_Config();
 		USART2_Config();
@@ -37,9 +42,7 @@ int main(void)
 		delay_ms(1000);
     while(1){
 			Communication_Process();
-			if(fsm_cpl == (*(read_sensor_hook))(&param)) {
-				delay_ms(10);
-			}
+
 		}
         
 }

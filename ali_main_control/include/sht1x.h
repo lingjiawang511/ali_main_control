@@ -15,7 +15,7 @@
 #define DATA_HIGH() GPIO_SetBits(SHT10_DATA_PORT, SHT10_DATA_IO)
 #define READ_DATA() GPIO_ReadInputDataBit(SHT10_DATA_PORT,SHT10_DATA_IO)
 
-#define _nop_() do{__NOP();__NOP();__NOP();__NOP();}while(0)
+#define _nop_() do{__NOP();__NOP();__NOP();__NOP();__NOP();__NOP();}while(0)
 
 typedef union {
     unsigned int i;
@@ -54,5 +54,5 @@ void calc_sth11(float *p_humidity , float *p_temperature);
 void s_connectionreset(void);
 float calc_dewpoint(float h,float t);
 char s_measure(unsigned char *p_value, unsigned char *p_checksum, unsigned char mode);
-int sensor_init_sht1x(char *SerialNumber_SHT1x);
+int sensor_init_sht1x(void);
 #endif

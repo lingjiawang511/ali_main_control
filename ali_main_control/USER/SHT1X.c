@@ -15,7 +15,7 @@ Copyrigth:        (c) Sensirion AG
 
 #include"HeadType.h"	
 #include "sht1x.h"
-
+#define SHT10_USE_LOW_RESOLUTION    0
 double log(double a)
 {
     int N = 15;
@@ -155,7 +155,6 @@ char s_read_byte(unsigned char ack)
     _nop_();          //pulswith approx. 5 us
     SCK_LOW();//SCK=0;
     _nop_();                          //observe hold time
-		SHT10_SDA_IN();
     DATA_HIGH();//DATA=1;                           //release DATA-line
     return val;
 }
@@ -251,6 +250,7 @@ char s_measure(unsigned char *p_value, unsigned char *p_checksum, unsigned char 
 {
     unsigned char error = 0;
     unsigned int i;
+	  static unsigned char rdatah,rdaral;
 
     s_transstart();                   //transmission start
     switch (mode) {                   //send command to sensor
@@ -268,9 +268,15 @@ char s_measure(unsigned char *p_value, unsigned char *p_checksum, unsigned char 
         if (READ_DATA() == 0) break; //wait until sensor has finished the measurement
     }
     if (READ_DATA()) error += 1;             // or timeout (~2 sec.) is reached
-    *(p_value)  = s_read_byte(ACK);   //read the first byte (MSB)
-    *(p_value + 1) = s_read_byte(ACK); //read the second byte (LSB)
+		rdatah = s_read_byte(ACK);   //read the first byte (MSB)
+		rdaral = s_read_byte(ACK); //read the second byte (LSB)
+//     *(p_value)  = s_read_byte(ACK);   //read the first byte (MSB)
+//     *(p_value + 1) = s_read_byte(ACK); //read the second byte (LSB)
     *p_checksum = s_read_byte(noACK); //read checksum
+		*(p_value) = rdaral;
+		*(p_value + 1) = rdatah;
+		*(p_value + 2) = 0;
+		*(p_value + 3) = 0;
     return error;
 }
 
@@ -283,19 +289,26 @@ void calc_sth11(float *p_humidity , float *p_temperature)
 // output:  humi [%RH]
 //          temp [°C]
 {
-    const float C1 = -2.0468;         // for 12 Bit RH
-    const float C2 = +0.0367;         // for 12 Bit RH
-    const float C3 = -0.0000015955;   // for 12 Bit RH
+#if SHT10_USE_LOW_RESOLUTION == 1
+    const float C1 = -4;         			// for 8 Bit RH
+    const float C2 = +0.648;         // for 8 Bit RH
+    const float C3 = -0.00072;   			// for 8 Bit RH
+    const float T1 = +0.01;           // for 8 Bit RH
+    const float T2 = +0.00128;        // for 8 Bit RH	
+#else
+    const float C1 = -4;         			// for 12 Bit RH
+    const float C2 = +0.0405;         // for 12 Bit RH
+    const float C3 = -0.0000028;     // for 12 Bit RH
     const float T1 = +0.01;           // for 12 Bit RH
     const float T2 = +0.00008;        // for 12 Bit RH
-
+#endif
     float rh = *p_humidity;           // rh:      Humidity [Ticks] 12 Bit
     float t = *p_temperature;         // t:       Temperature [Ticks] 14 Bit
     float rh_lin;                     // rh_lin:  Humidity linear
     float rh_true;                    // rh_true: Temperature compensated humidity
     float t_C;                        // t_C   :  Temperature [°C]
 
-    t_C = t * 0.01 - 40.1;            //calc. temperature [°C] from 14 bit temp. ticks @ 5V
+    t_C = t * 0.01 - 39.6;            //calc. temperature [°C] from 14 bit temp. ticks @ 5V
     rh_lin = C3 * rh * rh + C2 * rh + C1; //calc. humidity from ticks to [%RH]
     rh_true = (t_C - 25) * (T1 + T2 * rh) + rh_lin; //calc. temperature compensated humidity [%RH]
     if (rh_true > 100)rh_true = 100;  //cut if the value is outside of
@@ -322,14 +335,13 @@ fsm_t read_sensor_sh1x(tag_param *p)
     unsigned char checksum;
     unsigned int  count;
 
-    value humi_val, temp_val;
+    static value humi_val, temp_val;
 
 
     switch (s_state) {
     case STATE_START:
     case STATE_READ_DATA:
-        error = s_measure((unsigned char*) &humi_val.i, &checksum, HUMI);
-				delay_ms(10);
+        error = s_measure((unsigned char*) &humi_val.i, &checksum, HUMI);// 耗时20/80/320MS
         error += s_measure((unsigned char*) &temp_val.i, &checksum, TEMP);
         if (error != 0) {
             s_state = STATE_READ_RESET;
@@ -346,8 +358,8 @@ fsm_t read_sensor_sh1x(tag_param *p)
         temp_val.f = (float)temp_val.i;
         calc_sth11(&humi_val.f, &temp_val.f);
 
-        p->temperatureC = (temp_val.f*100);
-        p->humidityRH   = (humi_val.f*100);
+        p->temperatureC = (temp_val.f*10);
+        p->humidityRH   = (humi_val.f*10);
 
         s_state = STATE_WAITTING;
         break;
@@ -364,10 +376,23 @@ void register_read_sensor(pread_sensor func)
 {
     read_sensor_hook = func;
 }
-int sensor_init_sht1x(char *SerialNumber_SHT1x)
+int sensor_init_sht1x(void)
 {
+	  static u8  error,checksum,sht_reg=0,wreg = 0x01;
 		SHT10_GPIO_Config();
     register_read_sensor(read_sensor_sh1x);
     s_connectionreset();
+	  error = s_read_statusreg(&sht_reg, &checksum);
+#if SHT10_USE_LOW_RESOLUTION == 1
+		if((sht_reg&0x01) != 0x01){
+			error = s_write_statusreg(&wreg);
+		}
+#else
+		if((sht_reg&0x01) == 0x01){
+			wreg = sht_reg&0xfe;
+			error = s_write_statusreg(&wreg);
+		}
+#endif
+	  sht_reg = sht_reg;
     return 0;
 }
