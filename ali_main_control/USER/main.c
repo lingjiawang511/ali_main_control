@@ -1,9 +1,12 @@
 #include"HeadType.h"	
 #include "usart.h"
 #include "TIM.h"
+#include "sht1x.h"
 
 Belt_Work_Type belt;
-tag_param param = {0};
+ Printer_Type Printer;
+ Control_Input_Type Control;
+
 void delay_ms1(u16 ms)
 {
 	u16  i;
@@ -14,34 +17,30 @@ void delay_ms1(u16 ms)
 		;
 	}
 }
-static void init_interface(void)
-{
-		delay_init();
-// 		Key_Light_Init();
-// 		Belt_Config();
-// 		LED_GPIO_Config();
-// 		EXTIX_Init();
-// 		sensor_init_sht1x(0);
-    USART1_Config();
-// 		USART2_Config();
-// 		USART3_Config();
-// 		USART4_Config();
-    TIM2_Config();
-    TIM3_Config();
-// 		param_init();	
-}
+tag_param param = {0};
 //配置时钟在target宏定义
 int main(void)
 {
-		init_interface();
-// 		delay_ms(1000);
+		delay_init();
+		Key_Light_Init();
+// 		Belt_Config();
+		LED_GPIO_Config();
+	 sensor_init_sht1x(NULL);
+// 		EXTIX_Init();
+    USART1_Config();
+		USART2_Config();
+		USART3_Config();
+		USART4_Config();
+    TIM2_Config();
+    TIM3_Config();
+// 		param_init();
+		delay_ms(1000);
     while(1){
-					Communication_Process();
-//           if(fsm_cpl == (*(read_sensor_hook))(&param)) {
-// 							delay_ms(10);
-//             }
-					}
-// 					delay_ms(100);
+			Communication_Process();
+			if(fsm_cpl == (*(read_sensor_hook))(&param)) {
+				delay_ms(10);
+			}
+		}
         
 }
 

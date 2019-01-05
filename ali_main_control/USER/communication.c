@@ -291,9 +291,9 @@ static u8 Execute_Host_Comm(void)
 void Communication_Process(void)
 {
     if (1 == Usart1_Control_Data.rx_aframe){    
-// 				Execute_Host_Comm();		
+				Execute_Host_Comm();		
 				Usart1_Control_Data.rx_count = 0;
-// 				Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
+				Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
 				Usart1_Control_Data.rx_aframe = 0;
 			
 				Usart1_Control_Data.tx_count = 0;

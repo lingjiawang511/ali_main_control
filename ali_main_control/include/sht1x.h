@@ -15,7 +15,7 @@
 #define DATA_HIGH() GPIO_SetBits(SHT10_DATA_PORT, SHT10_DATA_IO)
 #define READ_DATA() GPIO_ReadInputDataBit(SHT10_DATA_PORT,SHT10_DATA_IO)
 
-#define _nop_() do{__NOP();}while(0)
+#define _nop_() do{__NOP();__NOP();__NOP();__NOP();}while(0)
 
 typedef union {
     unsigned int i;

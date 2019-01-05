@@ -203,17 +203,17 @@ void TIM3_IRQHandler(void)
                 Usart3_Control_Data.rx_index = 0;
             }
         }
-// 				if (1 == Usart4_Control_Data.rx_start){
-//             if(Auto_Frame_Time4 >0){
-//                 Auto_Frame_Time4--;
-//             }else{
-//                 Auto_Frame_Time4 = 0;
-//                 Usart4_Control_Data.rx_aframe = 1; 
-//                 Usart4_Control_Data.rx_count = Usart4_Control_Data.rx_index;
-//                 Usart4_Control_Data.rx_start = 0;
-//                 Usart4_Control_Data.rx_index = 0;
-//             }
-//         }
+				if (1 == Usart4_Control_Data.rx_start){
+            if(Auto_Frame_Time4 >0){
+                Auto_Frame_Time4--;
+            }else{
+                Auto_Frame_Time4 = 0;
+                Usart4_Control_Data.rx_aframe = 1; 
+                Usart4_Control_Data.rx_count = Usart4_Control_Data.rx_index;
+                Usart4_Control_Data.rx_start = 0;
+                Usart4_Control_Data.rx_index = 0;
+            }
+        }
 			Input_pulse_IRQTimer();    //所有通道电机脉冲计数
       TIM_ClearITPendingBit(TIM3 , TIM_FLAG_Update);     
 	}		 	
@@ -228,10 +228,9 @@ void TIM3_IRQHandler(void)
 void USART1_IRQHandler(void)
 {
   
-		if(USART_GetFlagStatus(USART1, USART_FLAG_RXNE)||USART_GetFlagStatus(USART1, USART_FLAG_ORE) != RESET){ //解决数据没接收完一直进中断的问题
+	if(USART_GetFlagStatus(USART1, USART_FLAG_RXNE)||USART_GetFlagStatus(USART1, USART_FLAG_ORE) != RESET){ //解决数据没接收完一直进中断的问题
        USART1_Do_Rx(USART_ReceiveData(USART1));
        USART_ClearFlag(USART1,USART_FLAG_RXNE);
-			 USART_ClearFlag(USART1,USART_FLAG_ORE);
 	}
 	if(USART_GetFlagStatus(USART1, USART_FLAG_TC)){
        USART1_Do_Tx();
@@ -247,11 +246,9 @@ void USART1_IRQHandler(void)
 void USART2_IRQHandler(void)
 {
   
-	if(USART_GetFlagStatus(USART2, USART_FLAG_RXNE) != RESET){ //解决数据没接收完一直进中断的问题
+	if(USART_GetFlagStatus(USART2, USART_FLAG_RXNE)||USART_GetFlagStatus(USART2, USART_FLAG_ORE) != RESET){ //解决数据没接收完一直进中断的问题
        USART2_Do_Rx(USART_ReceiveData(USART1));
        USART_ClearFlag(USART2,USART_FLAG_RXNE);
-	}else if (USART_GetFlagStatus(USART2, USART_FLAG_ORE) != RESET){
-			 USART_ClearFlag(USART2,USART_FLAG_ORE);
 	}
 	if(USART_GetFlagStatus(USART2, USART_FLAG_TC)){
        USART2_Do_Tx();
@@ -267,11 +264,9 @@ void USART2_IRQHandler(void)
 void USART3_IRQHandler(void)
 {
   
-	if(USART_GetFlagStatus(USART3, USART_FLAG_RXNE) != RESET){ //解决数据没接收完一直进中断的问题
+	if(USART_GetFlagStatus(USART3, USART_FLAG_RXNE)||USART_GetFlagStatus(USART3, USART_FLAG_ORE) != RESET){ //解决数据没接收完一直进中断的问题
        USART3_Do_Rx(USART_ReceiveData(USART3));
        USART_ClearFlag(USART3,USART_FLAG_RXNE);
-	}else if (USART_GetFlagStatus(USART3, USART_FLAG_ORE) != RESET){
-			 USART_ClearFlag(USART3,USART_FLAG_ORE);
 	}
 	if(USART_GetFlagStatus(USART3, USART_FLAG_TC)){
        USART3_Do_Tx();
@@ -287,11 +282,9 @@ void USART3_IRQHandler(void)
 void UART4_IRQHandler(void)
 {
   
-	if(USART_GetFlagStatus(UART4, USART_FLAG_RXNE) != RESET){ //解决数据没接收完一直进中断的问题
+	if(USART_GetFlagStatus(UART4, USART_FLAG_RXNE)||USART_GetFlagStatus(UART4, USART_FLAG_ORE) != RESET){ //解决数据没接收完一直进中断的问题
        USART4_Do_Rx(USART_ReceiveData(UART4));
        USART_ClearFlag(UART4,USART_FLAG_RXNE);
-	}else if (USART_GetFlagStatus(UART4, USART_FLAG_ORE) != RESET){
-			 USART_ClearFlag(UART4,USART_FLAG_ORE);
 	}
 	if(USART_GetFlagStatus(UART4, USART_FLAG_TC)){
        USART4_Do_Tx();

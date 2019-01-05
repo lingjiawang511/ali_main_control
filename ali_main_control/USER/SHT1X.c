@@ -13,7 +13,7 @@ Copyrigth:        (c) Sensirion AG
 //                          changed (for V4 sensors)
 //       calc_dewpoint()  New formula for dew point calculation
 
-#include "HeadType.h"
+#include"HeadType.h"	
 #include "sht1x.h"
 
 double log(double a)
@@ -70,9 +70,9 @@ void SHT10_SDA_OUT(void)
 	//选择要用的GPIO引脚		
 	GPIO_InitStructure.GPIO_Pin = SHT10_DATA_IO	;
 	///设置引脚模式为推免输出模式			 
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_OD; 		 
 	//设置引脚速度为50MHZ
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	//调用库函数，初始化GPIO
 	GPIO_Init(SHT10_DATA_PORT, &GPIO_InitStructure);
 // 	GPIOB->MODER&=~(3<<(6*2));GPIOB->MODER|=1<<6*2;
@@ -91,7 +91,7 @@ void SHT10_SDA_IN(void)
 	RCC_APB2PeriphClockCmd(SHT10_DATA_RCC,ENABLE);		
 	GPIO_InitStructure.GPIO_Pin = SHT10_DATA_IO;	 
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU; 		 
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;
 	GPIO_Init(SHT10_DATA_PORT, &GPIO_InitStructure);
 // 	GPIOB->MODER&=~(3<<(6*2));GPIOB->MODER|=0<<6*2;
 }
@@ -264,6 +264,7 @@ char s_measure(unsigned char *p_value, unsigned char *p_checksum, unsigned char 
         break;
     }
     for (i = 65535; i != 0 ; i--) {
+				delay_us(10);
         if (READ_DATA() == 0) break; //wait until sensor has finished the measurement
     }
     if (READ_DATA()) error += 1;             // or timeout (~2 sec.) is reached
@@ -304,19 +305,7 @@ void calc_sth11(float *p_humidity , float *p_temperature)
     *p_humidity = rh_true;            //return humidity[%RH]
 }
 
-//--------------------------------------------------------------------
-float calc_dewpoint(float h, float t)
-//--------------------------------------------------------------------
-// calculates dew point
-// input:   humidity [%RH], temperature [°C]
-// output:  dew point [°C]
-{
-    float k, dew_point ;
 
-    k = ((log(h) / (log(10))) - 2) / 0.4343 + (17.62 * t) / (243.12 + t);
-    dew_point = 243.12 * k / (17.62 - k);
-    return dew_point;
-}
 
 fsm_t read_sensor_sh1x(tag_param *p)
 {
@@ -334,12 +323,13 @@ fsm_t read_sensor_sh1x(tag_param *p)
     unsigned int  count;
 
     value humi_val, temp_val;
-    float dew_point;
+
 
     switch (s_state) {
     case STATE_START:
     case STATE_READ_DATA:
         error = s_measure((unsigned char*) &humi_val.i, &checksum, HUMI);
+				delay_ms(10);
         error += s_measure((unsigned char*) &temp_val.i, &checksum, TEMP);
         if (error != 0) {
             s_state = STATE_READ_RESET;
@@ -359,7 +349,6 @@ fsm_t read_sensor_sh1x(tag_param *p)
         p->temperatureC = (temp_val.f*100);
         p->humidityRH   = (humi_val.f*100);
 
-        dew_point = calc_dewpoint(humi_val.f, temp_val.f);
         s_state = STATE_WAITTING;
         break;
     case STATE_WAITTING:
