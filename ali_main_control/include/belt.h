@@ -4,15 +4,15 @@
 #include "stm32f10x.h"
 #include "delay.h"
 
-#define	BELT_SPEED1_IO				GPIO_Pin_6
-#define	BELT_SPEED1_PORT			GPIOB
+#define	BELT_SPEED1_IO				GPIO_Pin_1
+#define	BELT_SPEED1_PORT			GPIOA
 #define	BELT_SPEED2_IO				GPIO_Pin_12
 #define	BELT_SPEED2_PORT			GPIOC
 #define	BELT_SPEED3_IO				GPIO_Pin_2
 #define	BELT_SPEED3_PORT			GPIOD
-#define	BELT_DIR_IO						GPIO_Pin_7
-#define	BELT_DIR_PORT					GPIOB
-#define	BELT_ERR_IO						GPIO_Pin_5
+#define	BELT_DIR_IO						GPIO_Pin_0
+#define	BELT_DIR_PORT					GPIOA
+#define	BELT_ERR_IO						GPIO_Pin_8
 #define	BELT_ERR_PORT					GPIOB
 
 #define BELT_SPEED1_SET  			GPIO_SetBits(BELT_SPEED1_PORT, BELT_SPEED1_IO)
@@ -26,10 +26,10 @@
 
 #define READ_BELT_ERR    			GPIO_ReadInputDataBit(BELT_ERR_PORT,BELT_ERR_IO) 
 
-#define BELT_SPEED1				 		PBout(6)
+#define BELT_SPEED1				 		PAout(1)
 #define BELT_SPEED2 					PCout(12)
 #define BELT_SPEED3						PDout(2)
-#define BELT_DIR 							PBout(7)
+#define BELT_DIR 							PAout(0)
 // #define BELT_ERR 							PCout(10)// PB5
 
 #define Belt_Speed(x3,x2,x1)	do{	BELT_SPEED1 = x1;BELT_SPEED1 = x2;BELT_SPEED1 = x3;}while(0)

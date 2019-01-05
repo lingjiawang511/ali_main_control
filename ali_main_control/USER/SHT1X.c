@@ -324,7 +324,8 @@ fsm_t read_sensor_sh1x(tag_param *p)
 {
     static enum {
         STATE_START,
-        STATE_READ_DATA,
+        STATE_READ_TEMP_DATA,
+			  STATE_READ_HUMI_DATA,
         STATE_READ_RESET,
         STATE_CACULATE,
         STATE_WAITTING,
@@ -340,15 +341,23 @@ fsm_t read_sensor_sh1x(tag_param *p)
 
     switch (s_state) {
     case STATE_START:
-    case STATE_READ_DATA:
+    case STATE_READ_TEMP_DATA:
         error = s_measure((unsigned char*) &humi_val.i, &checksum, HUMI);// 耗时20/80/320MS
+
+        if (error != 0) {
+            s_state = STATE_READ_RESET;
+        } else {
+            s_state = STATE_READ_HUMI_DATA;
+        }
+        break;
+		case STATE_READ_HUMI_DATA:
         error += s_measure((unsigned char*) &temp_val.i, &checksum, TEMP);
         if (error != 0) {
             s_state = STATE_READ_RESET;
         } else {
             s_state = STATE_CACULATE;
         }
-        break;
+		break ;
     case STATE_READ_RESET:
         s_connectionreset();
         s_state = STATE_START;

@@ -14,7 +14,7 @@ u8 Send_Medicine_Finish_State;		//所有通道发药完成状态，避免发药没完成，皮带就停
 {
 		//定义一个GPIO_InitTypeDef 类型的结构体，名字叫GPIO_InitStructure 
 	GPIO_InitTypeDef  GPIO_InitStructure;
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD,ENABLE);
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA,ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB,ENABLE);
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC,ENABLE);
 	//皮带速度控制IO口1
@@ -148,6 +148,11 @@ void Belt_Control(void)
 	case RESERVE:	belt.actual_time = 1000;							
 								break;
 	case READY:	if(Start_Ok == 0){
+		            if(belt.dir == 1){
+									BELT_DIR = 1; //此处需要由通讯控制
+								}else{
+									BELT_DIR = 0;
+								}
 								Speed_Step = Start_Belt(Speed_Step);	
 						   }else{
 									belt.state = WORKING;
@@ -157,7 +162,7 @@ void Belt_Control(void)
 	case WORKING:if(Start_Ok == 1){
 									delay_time++;
 									if(delay_time >= belt.actual_time){
-//										belt.state = END ;
+										belt.state = END ;
 										delay_time = 0;
 									}
 								}

@@ -17,7 +17,7 @@ void delay_ms1(u16 ms)
 		;
 	}
 }
-void read_RH(void)
+void read_TEMP_RH(void)
 {
 	if(fsm_cpl == (*(read_sensor_hook))(&param)) {
 
@@ -28,7 +28,7 @@ int main(void)
 {
 		delay_init();
 		Key_Light_Init();
-// 		Belt_Config();
+		Belt_Config();
 		LED_GPIO_Config();
 	  sensor_init_sht1x();
 // 		EXTIX_Init();
@@ -42,7 +42,7 @@ int main(void)
 		delay_ms(1000);
     while(1){
 			Communication_Process();
-
+			read_TEMP_RH();
 		}
         
 }
@@ -74,7 +74,7 @@ int main(void)
 // 	Baffle_Control.process_time = Baffle_Control.PC_send_process_time;
 //   MCU_Host_Send.control.recom_state = 0;
 // 	Baffle_Control.PC_send_scanner_result = 0;
-// 	Baffle_Control.scanner_result_old = 0;
+// 	Ba ffle_Control.scanner_result_old = 0;
 // 	Update_Baffle_State(1);
 // 	baffle_err_timeout = BAFFLE_ERR_TIMEOUT;
 // }

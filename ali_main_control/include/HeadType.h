@@ -208,6 +208,7 @@ typedef struct{
 
 typedef struct{
 	CH_Work_Enum_Type  state;
+	u8 	 dir;
 	u8 	 send_time;
 	u16  actual_time;
 }Belt_Work_Type;
