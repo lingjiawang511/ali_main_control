@@ -334,7 +334,7 @@ fsm_t read_sensor_sh1x(tag_param *p)
 
     unsigned char error = 0;
     unsigned char checksum;
-    unsigned int  count;
+//     unsigned int  count;
 
     static value humi_val, temp_val;
 
@@ -391,6 +391,7 @@ int sensor_init_sht1x(void)
 		SHT10_GPIO_Config();
     register_read_sensor(read_sensor_sh1x);
     s_connectionreset();
+		error =error;
 	  error = s_read_statusreg(&sht_reg, &checksum);
 #if SHT10_USE_LOW_RESOLUTION == 1
 		if((sht_reg&0x01) != 0x01){

@@ -15,6 +15,7 @@
 #include "air_cylinder.h"
 #include "communication.h"
 #include "baffle.h"
+#include "LGgate.h"
 
 /*************Typedef datatype start*******************/
 typedef char int8;
@@ -87,6 +88,9 @@ enum
 };
 enum{
 	READLOW,READHIGH
+};
+enum{
+	LGLEFT,LGRIGHT
 };
 typedef enum{
 	SLAVE,
@@ -212,6 +216,12 @@ typedef struct{
 	u8 	 send_time;
 	u16  actual_time;
 }Belt_Work_Type;
+typedef struct{
+	CH_Work_Enum_Type  state;
+	u8 	 lgdir;
+	u8 	 send_time;
+	u16  actual_time;
+}LGgate_Work_Type;
 typedef struct{
 	CH_Work_Type ch1;
 	CH_Work_Type ch2;
