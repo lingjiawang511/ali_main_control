@@ -3,9 +3,7 @@
 #include "TIM.h"
 
 Belt_Work_Type belt;
- Printer_Type Printer;
- Control_Input_Type Control;
-
+tag_param param = {0};
 void delay_ms1(u16 ms)
 {
 	u16  i;
@@ -16,25 +14,34 @@ void delay_ms1(u16 ms)
 		;
 	}
 }
+static void init_interface(void)
+{
+		delay_init();
+// 		Key_Light_Init();
+// 		Belt_Config();
+// 		LED_GPIO_Config();
+// 		EXTIX_Init();
+// 		sensor_init_sht1x(0);
+    USART1_Config();
+// 		USART2_Config();
+// 		USART3_Config();
+// 		USART4_Config();
+    TIM2_Config();
+    TIM3_Config();
+// 		param_init();	
+}
 //配置时钟在target宏定义
 int main(void)
 {
-		delay_init();
-		Key_Light_Init();
-// 		Belt_Config();
-		LED_GPIO_Config();
-// 		EXTIX_Init();
-    USART1_Config();
-		USART2_Config();
-		USART3_Config();
-		USART4_Config();
-    TIM2_Config();
-    TIM3_Config();
-// 		param_init();
-		delay_ms(1000);
+		init_interface();
+// 		delay_ms(1000);
     while(1){
-			Communication_Process();
-		}
+					Communication_Process();
+//           if(fsm_cpl == (*(read_sensor_hook))(&param)) {
+// 							delay_ms(10);
+//             }
+					}
+// 					delay_ms(100);
         
 }
 

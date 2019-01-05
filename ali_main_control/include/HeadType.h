@@ -15,7 +15,7 @@
 #include "air_cylinder.h"
 #include "communication.h"
 #include "baffle.h"
-
+#include "sht1x.h"
 /*************Typedef datatype start*******************/
 typedef char int8;
 typedef volatile char vint8;
