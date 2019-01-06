@@ -4,40 +4,12 @@ MCU_State_Type MCU_State;
 Answer_Type 	 PC_Answer;
 COMM_Rec_Union_Type  MCU_Host_Rec;
 COMM_Send_Union_Type  MCU_Host_Send;
-////=============================================================================
-////函数名称: Comm_GPIO_Config
-////功能概要:硬件通信引脚配置
-////参数名称:无
-////函数返回:无
-////注意    :无
-////=============================================================================
-// void Communication_GPIO_Config(void)
-//{	
-//	//定义一个GPIO_InitTypeDef 类型的结构体，名字叫GPIO_InitStructure 
-//	GPIO_InitTypeDef  GPIO_InitStructure;
-//	//COMMUNICATION_IO1  IO配置,设备状态输出
-//	RCC_APB2PeriphClockCmd(COMMUNICATION_IO1_RCC,ENABLE);		
-//	GPIO_InitStructure.GPIO_Pin = COMMUNICATION_IO1_IO;	 
-//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 
-//	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-//	GPIO_Init(COMMUNICATION_IO1_PORT, &GPIO_InitStructure);
-//	//COMMUNICATION_IO2  IO配置
-//	RCC_APB2PeriphClockCmd(COMMUNICATION_IO2_RCC,ENABLE);		
-//	GPIO_InitStructure.GPIO_Pin = COMMUNICATION_IO2_IO;	 
-//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 
-//	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-//	GPIO_Init(COMMUNICATION_IO2_PORT, &GPIO_InitStructure);
-//	//COMMUNICATION_IO3  IO配置
-//	RCC_APB2PeriphClockCmd(COMMUNICATION_IO3_RCC,ENABLE);		
-//	GPIO_InitStructure.GPIO_Pin = COMMUNICATION_IO3_IO;	 
-//	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU; 		 
-//	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
-//	GPIO_Init(COMMUNICATION_IO3_PORT, &GPIO_InitStructure);
 
-//}
-
-
-
+COMM_SlaveRec_Union_Type  	MCU_Rec;
+COMM_SlaveSend_Union_Type 	MCU_Send;
+// COMM_HostSend_Union_Type 		Group1_Send,Group2_Send;
+// COMM_HostRec_Union_Type  		Group1_Rec,Group2_Rec;
+Group_COMM_Type Group1,Group2;
 //=============================================================================
 //函数名称:SLAVE_Rec_Comm
 //功能概要:PC作为通讯主机时接收的控制字处理并响应
@@ -232,6 +204,116 @@ static u8  SLAVE_Rec_Comm(void)
 
 
 //}
+static void response_pc_control(u8 usart,u8 *prdata,u16 reason,u8 MCUstate)
+{
+	 u16 crc;
+	if(usart == 1){
+			Usart1_Control_Data.tx_count = 0;
+		  Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = *prdata++;
+			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x80 + *prdata++;
+			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =*prdata++;
+			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =*prdata++;
+			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =*prdata++;
+			if(MCUstate == 0){//CRC校验正确，返回主机发送的数据
+				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =*prdata++;
+				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =*prdata;				
+			}else if(MCUstate == 1){//CRC错误
+				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
+				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0xFF;
+			}else if(MCUstate ==2){//其他故障发生时，回复上位机
+				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =reason >>8;
+				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =reason;				
+			}
+			crc=CRC_GetModbus16(Usart1_Control_Data.txbuf,Usart1_Control_Data.tx_count);
+			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =crc;
+			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =crc>>8;
+			Usart1_Control_Data.tx_index = 0;
+			USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
+	}else if(usart == 2){
+		  Usart2_Control_Data.tx_count = 0;
+		  Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = *prdata++;
+			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x80 + *prdata++;
+			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =*prdata++;
+			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =*prdata++;
+			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =*prdata++;
+			if(MCUstate == 0){//CRC校验正确，返回主机发送的数据
+				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =*prdata++;
+				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =*prdata;				
+			}else if(MCUstate == 1){//CRC错误
+				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x00;
+				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0xFF;
+			}else if(MCUstate ==2){//其他故障发生时，回复上位机
+				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =reason >>8;
+				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =reason;				
+			}
+			crc=CRC_GetModbus16(Usart2_Control_Data.txbuf,Usart2_Control_Data.tx_count);
+			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =crc;
+			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =crc>>8;
+			Usart2_Control_Data.tx_index = 0;
+			USART_SendData(USART2,Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_index++]);
+	}
+}
+static u8 group_send_medicine(u8 group,COMM_SlaveRec_Union_Type recdata)
+{
+	u16 crc;
+	u8 i;
+	if(group == 1){
+		Usart3_Control_Data.tx_count = 0;
+		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x04;
+		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x06;
+		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = recdata.control.line;
+		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = recdata.control.colum;
+		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = recdata.control.command;	
+		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = recdata.control.medicine_num;	
+    crc=CRC_GetModbus16(Usart3_Control_Data.txbuf,Usart3_Control_Data.tx_count);
+		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] =crc;
+		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] =crc>>8;
+		for(i=0;i<Usart3_Control_Data.tx_count;i++){//复制需要发送给水平板的数据到数组中，当接收到发药状态时清零
+			Group1.group_send[recdata.control.line -1].rec_buf[i] = Usart3_Control_Data.txbuf[i];
+		}
+		Group1.send_count++;
+		Usart3_Control_Data.tx_index = 0;
+		USART_SendData(USART3,Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_index++]);
+		
+	}else if(group == 2){
+		Usart4_Control_Data.tx_count = 0;
+		Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x04;
+		Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x06;
+		Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = recdata.control.line;
+		Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = recdata.control.colum;
+		Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = recdata.control.command;	
+		Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = recdata.control.medicine_num;	
+    crc=CRC_GetModbus16(Usart4_Control_Data.txbuf,Usart4_Control_Data.tx_count);
+		Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] =crc;
+		Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] =crc>>8;
+		for(i=0;i<Usart4_Control_Data.tx_count;i++){//复制需要发送给水平板的数据到数组中，当接收到发药状态时清零
+			Group2.group_send[recdata.control.line -1].rec_buf[i] = Usart4_Control_Data.txbuf[i];
+		}		
+		Group2.send_count++;
+		Usart4_Control_Data.tx_index = 0;
+		USART_SendData(UART4,Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_index++]);		
+  }
+	return 0;
+}
+static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 reason,u8 device_satate)
+{
+	 if(device_satate == 0){ //设备OK，解析并执行命令
+			switch(recdata.control.group_name){
+				case 0://其他控制
+					break;
+				case 1:
+					group_send_medicine(1,recdata);
+					break;
+				case 2:
+					group_send_medicine(2,recdata);
+					break;
+				default:
+					break;
+			}
+	}else{//设备故障
+		response_pc_control(usart,recdata.rec_buf,reason,2);
+	}
+}
 //=============================================================================
 //函数名称:Execute_Host_Comm
 //功能概要:执行上位机发出的命令
@@ -239,46 +321,47 @@ static u8  SLAVE_Rec_Comm(void)
 //函数返回:无
 //注意    :无
 //=============================================================================
-static u8 Execute_Host_Comm(void)
+static u8 Execute_Host_Comm(u8 usart)
 {
 	u8 res;
-	switch(MCU_State){
-	case SLAVE: res = SLAVE_Rec_Comm();
-							if(0 == res){
-								Usart1_Control_Data.tx_index = 0;
-								USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
-//								MCU_State = HOST;		//正确接收到PC机发送的控制信息，响应后状态机变为主机模式
-							}else if(1 == res){
-								Usart1_Control_Data.tx_index = 0;
-								USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
-							}
-							break;
-	case HOST :
-//							res = Host_Rec_Comm();
-//							if(( res== 1)||(res == 3)){//主机没有正确接收到数据，重新发送数据
-//								Usart1_Control_Data.tx_index = 0;
-//								Usart1_Control_Data.tx_count = 16;	
-//								PC_Answer.Nanswer_timeout = NANSWER_TIME;
-//								if(PC_Answer.answer_numout==0){
-//									MCU_State = SLAVE;
-//									PC_Answer.Nanswer_timeout = NANSWER_TIME;
-//									PC_Answer.answer_numout = NANSWER_NUMOUT;
-//									PC_Answer.answer_state = 0;
-//								}else{
-//									PC_Answer.answer_numout--;
-//								}
-//								USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);//原来的数据没改变，所以直接发送
-//							}else if(res == 0){
-//								PC_Answer.answer_state = 0;	
-//								MCU_State = SLAVE;		//正确接收到PC机发送的接收状态信息，转化为从机等待下一次PC发送控制信息
-//								PC_Answer.Nanswer_timeout = NANSWER_TIME;
-//								PC_Answer.answer_numout = NANSWER_NUMOUT;
-//							}
-						break;
-	default :MCU_State = SLAVE;		
-					 break ;
+	u8 i;
+	u16 crc;
+	if(usart == SELECT_USART1){
+		if((Usart1_Control_Data.rx_count < 9)||(Usart1_Control_Data.rxbuf[0] != 0x05)){
+			res = 2;
+			return res;
+		}
+		crc=CRC_GetModbus16(Usart1_Control_Data.rxbuf,Usart1_Control_Data.rx_count-2);//帧结束尾不做校验
+		if((Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-2]+\
+				Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-1]*256 == crc)){	    
+				for(i = 0;i < 18;i++){
+							MCU_Rec.rec_buf[i] = Usart1_Control_Data.rxbuf[i];
+				 }//把数据复制给主机通讯结构体
+				resolve_host_command(SELECT_USART1, MCU_Rec,0x00,0x00);
+				res = 0;
+		}else{
+				response_pc_control(SELECT_USART1,Usart1_Control_Data.rxbuf,0x00FF,1);
+				res = 1;
+		}
+	}else if(usart == SELECT_USART2){
+		if((Usart2_Control_Data.rx_count < 9)||(Usart2_Control_Data.rxbuf[0] != 0x05)){
+			res = 2;
+			return res;
+		}
+		crc=CRC_GetModbus16(Usart2_Control_Data.rxbuf,Usart2_Control_Data.rx_count-2);//帧结束尾不做校验
+		if((Usart2_Control_Data.rxbuf[Usart2_Control_Data.rx_count-2]+\
+				Usart2_Control_Data.rxbuf[Usart2_Control_Data.rx_count-1]*256 == crc)){	    
+				for(i = 0;i < 18;i++){
+							MCU_Rec.rec_buf[i] = Usart2_Control_Data.rxbuf[i];
+				 }//把数据复制给主机通讯结构体
+				resolve_host_command(SELECT_USART2, MCU_Rec,0x00,0x00);
+				res = 0;
+		}else{
+				response_pc_control(SELECT_USART2,Usart2_Control_Data.rxbuf,0x00FF,1);
+				res = 1;
+		}
 	}
-	return res;
+			return res;
 }
 
 //=============================================================================
@@ -291,32 +374,17 @@ static u8 Execute_Host_Comm(void)
 void Communication_Process(void)
 {
     if (1 == Usart1_Control_Data.rx_aframe){    
-				Execute_Host_Comm();		
+				Execute_Host_Comm(SELECT_USART1);		
 				Usart1_Control_Data.rx_count = 0;
 				Auto_Frame_Time1 = AUTO_FRAME_TIMEOUT1;
 				Usart1_Control_Data.rx_aframe = 0;
-			
-				Usart1_Control_Data.tx_count = 0;
-				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x01;
-				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x58;
-				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x00;
-				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x06;			
-				Usart1_Control_Data.tx_index = 0;
-				USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
     }
 	  if (1 == Usart2_Control_Data.rx_aframe){    
-	
+				Execute_Host_Comm(SELECT_USART2);	
 				Usart2_Control_Data.rx_count = 0;
 				Auto_Frame_Time2 = AUTO_FRAME_TIMEOUT2;
 				Usart2_Control_Data.rx_aframe = 0;
-			
-			  Usart2_Control_Data.tx_count = 0;
-				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = 0x01;
-				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = 0x58;
-				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = 0x00;
-				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = 0x06;			
-				Usart2_Control_Data.tx_index = 0;
-				USART_SendData(USART2,Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_index++]);
+				
     }
 		if (1 == Usart3_Control_Data.rx_aframe){    
 	
@@ -324,13 +392,13 @@ void Communication_Process(void)
 				Auto_Frame_Time3 = AUTO_FRAME_TIMEOUT3;
 				Usart3_Control_Data.rx_aframe = 0;
 			
-				Usart3_Control_Data.tx_count = 0;
-				Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x01;
-				Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x58;
-				Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x00;
-				Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x06;			
-				Usart3_Control_Data.tx_index = 0;
-				USART_SendData(USART3,Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_index++]);
+// 				Usart3_Control_Data.tx_count = 0;
+// 				Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x01;
+// 				Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x58;
+// 				Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x00;
+// 				Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x06;			
+// 				Usart3_Control_Data.tx_index = 0;
+// 				USART_SendData(USART3,Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_index++]);
     }
 	  if (1 == Usart4_Control_Data.rx_aframe){    
 	
@@ -338,13 +406,13 @@ void Communication_Process(void)
 				Auto_Frame_Time4 = AUTO_FRAME_TIMEOUT4;
 				Usart4_Control_Data.rx_aframe = 0;
 			
-				Usart4_Control_Data.tx_count = 0;
-				Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x01;
-				Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x58;
-				Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x00;
-				Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x06;			
-				Usart4_Control_Data.tx_index = 0;
-				USART_SendData(UART4,Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_index++]);
+// 				Usart4_Control_Data.tx_count = 0;
+// 				Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x01;
+// 				Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x58;
+// 				Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x00;
+// 				Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x06;			
+// 				Usart4_Control_Data.tx_index = 0;
+// 				USART_SendData(UART4,Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_index++]);
     }
 		
 }

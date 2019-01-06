@@ -92,6 +92,9 @@ enum{
 enum{
 	LGLEFT,LGRIGHT
 };
+enum{
+	NOSELECT_USART,SELECT_USART1,SELECT_USART2
+};
 typedef enum{
 	SLAVE,
 	HOST
@@ -194,6 +197,71 @@ typedef struct{
 	u16 Nanswer_timeout;
 }Answer_Type;
 
+typedef struct{
+	u8  addr;
+	u8  function;
+	u8  group_name;
+	u8  line;
+	u8  colum;
+	u8  command;  
+	u8  medicine_num;  
+	u16 crc16_ccitt; 
+}Communation_SlaveRec_Type;
+typedef union{
+	Communation_SlaveRec_Type control;
+	u8	rec_buf[9];	
+}COMM_SlaveRec_Union_Type;
+typedef struct{
+	u8  addr;
+	u8  function;
+	u8  group_name;
+	u8  line;
+	u8  colum;
+	u8  command;  
+	u8  medicine_num;  
+	u16 crc16_ccitt; 
+}Communation_SlaveSend_Type;
+typedef union{
+	Communation_SlaveSend_Type feedback;
+	u8	rec_buf[9];	
+}COMM_SlaveSend_Union_Type;
+
+typedef struct{
+	u8  level_addr;
+	u8  function;
+	u8  line;
+	u8  colum;
+	u8  command;  
+	u8  task;  
+	u16 crc16_ccitt; 
+}Communation_HostSend_Type;
+typedef union{
+	Communation_HostSend_Type control;
+	u8	rec_buf[9];	
+}COMM_HostSend_Union_Type;
+typedef struct{
+	u8  level_addr;
+	u8  function;
+	u8  line;
+	u8  colum;
+	u8  command;  
+	u8  state;
+	u8  result1; 
+	u8  result2;   
+	u16 crc16_ccitt; 
+}Communation_HostRec_Type;
+typedef union{
+	Communation_HostRec_Type feedback;
+	u8	rec_buf[11];	
+}COMM_HostRec_Union_Type;
+typedef struct {
+	u8 send_count;
+	u8 send_index;
+	u8 rec_count;
+	u8 rec_index;
+	COMM_HostSend_Union_Type	group_send[20];
+	COMM_HostRec_Union_Type		group_rec[20];
+}Group_COMM_Type;
 typedef struct{
 	CH_Work_Enum_Type  state;
 	u8 	send_num;			//需要发药数，由PC机发送过来
