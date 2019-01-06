@@ -151,12 +151,10 @@ void TIM2_IRQHandler(void)
 		Belt_Control();
 		Key_Light_Dispose();
 
-    if(uiRoll_Paper_ON_Delay > 0){
-      uiRoll_Paper_ON_Delay--;
-    }else{
-      PRINTER_RESTART_OFF;
+    if(Group_Check_Time > 0){
+      Group_Check_Time--;
     }
-
+		
 		TIM_ClearITPendingBit(TIM2 , TIM_FLAG_Update);  		 
 	}		 	
 }

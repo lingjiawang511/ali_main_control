@@ -10,6 +10,7 @@ COMM_SlaveSend_Union_Type 	MCU_Send;
 // COMM_HostSend_Union_Type 		Group1_Send,Group2_Send;
 // COMM_HostRec_Union_Type  		Group1_Rec,Group2_Rec;
 Group_COMM_Type Group1,Group2;
+u16 Group_Check_Time = 40;  //200ms
 //=============================================================================
 //函数名称:SLAVE_Rec_Comm
 //功能概要:PC作为通讯主机时接收的控制字处理并响应
@@ -208,9 +209,14 @@ static void response_pc_control(u8 usart,u8 *prdata,u16 reason,u8 MCUstate)
 {
 	 u16 crc;
 	if(usart == 1){
+		  while(Usart1_Control_Data.tx_count!=0);
 			Usart1_Control_Data.tx_count = 0;
 		  Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = *prdata++;
-			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x80 + *prdata++;
+		  if(MCUstate == 0){
+				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = *prdata++;
+			}else{
+				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x80 + *prdata++;
+			}
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =*prdata++;
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =*prdata++;
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =*prdata++;
@@ -230,9 +236,14 @@ static void response_pc_control(u8 usart,u8 *prdata,u16 reason,u8 MCUstate)
 			Usart1_Control_Data.tx_index = 0;
 			USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
 	}else if(usart == 2){
+		  while(Usart2_Control_Data.tx_count!=0);
 		  Usart2_Control_Data.tx_count = 0;
 		  Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = *prdata++;
-			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x80 + *prdata++;
+		  if(MCUstate == 0){
+				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = *prdata++;
+			}else{
+				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x80 + *prdata++;
+			}
 			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =*prdata++;
 			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =*prdata++;
 			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =*prdata++;
@@ -245,6 +256,51 @@ static void response_pc_control(u8 usart,u8 *prdata,u16 reason,u8 MCUstate)
 			}else if(MCUstate ==2){//其他故障发生时，回复上位机
 				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =reason >>8;
 				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =reason;				
+			}
+			crc=CRC_GetModbus16(Usart2_Control_Data.txbuf,Usart2_Control_Data.tx_count);
+			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =crc;
+			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =crc>>8;
+			Usart2_Control_Data.tx_index = 0;
+			USART_SendData(USART2,Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_index++]);
+	}
+}
+static void mcu_send_pc_status(u8 PCusart,u8 GRusart,u8 *prdata,u16 state,u8 result)
+{
+	 u16 crc;
+	if(PCusart == 1){
+		  while(Usart1_Control_Data.tx_count!=0);
+			Usart1_Control_Data.tx_count = 0;
+		  Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x06;
+			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x06;
+			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =GRusart - 2;
+			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =*(prdata+2);
+			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =*(prdata+3);
+			if(*(prdata+4) == 2){//等于2的时候是灯指令
+// 				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =*(prdata+4);
+// 				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =*(prdata+5);				
+			}else {
+					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =*(prdata+5);
+					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =*(prdata+7);				
+			}
+			crc=CRC_GetModbus16(Usart1_Control_Data.txbuf,Usart1_Control_Data.tx_count);
+			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =crc;
+			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =crc>>8;
+			Usart1_Control_Data.tx_index = 0;
+			USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
+	}else if(PCusart == 2){
+		  while(Usart2_Control_Data.tx_count!=0);
+			Usart2_Control_Data.tx_count = 0;
+		  Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = 0x06;
+			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x06;
+			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =GRusart - 2;
+			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =*(prdata+2);
+			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =*(prdata+3);
+			if(*(prdata+4) == 2){//等于2的时候是灯指令
+// 				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =*(prdata+4);
+// 				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =*(prdata+5);				
+			}else {
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =*(prdata+5);
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =*(prdata+7);				
 			}
 			crc=CRC_GetModbus16(Usart2_Control_Data.txbuf,Usart2_Control_Data.tx_count);
 			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =crc;
@@ -269,7 +325,7 @@ static u8 group_send_medicine(u8 group,COMM_SlaveRec_Union_Type recdata)
 		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] =crc;
 		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] =crc>>8;
 		for(i=0;i<Usart3_Control_Data.tx_count;i++){//复制需要发送给水平板的数据到数组中，当接收到发药状态时清零
-			Group1.group_send[recdata.control.line -1].rec_buf[i] = Usart3_Control_Data.txbuf[i];
+			Group1.group_send[recdata.control.line -1].send_buf[i] = Usart3_Control_Data.txbuf[i];
 		}
 		Group1.send_count++;
 		Usart3_Control_Data.tx_index = 0;
@@ -287,7 +343,7 @@ static u8 group_send_medicine(u8 group,COMM_SlaveRec_Union_Type recdata)
 		Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] =crc;
 		Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] =crc>>8;
 		for(i=0;i<Usart4_Control_Data.tx_count;i++){//复制需要发送给水平板的数据到数组中，当接收到发药状态时清零
-			Group2.group_send[recdata.control.line -1].rec_buf[i] = Usart4_Control_Data.txbuf[i];
+			Group2.group_send[recdata.control.line -1].send_buf[i] = Usart4_Control_Data.txbuf[i];
 		}		
 		Group2.send_count++;
 		Usart4_Control_Data.tx_index = 0;
@@ -310,6 +366,7 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 				default:
 					break;
 			}
+			response_pc_control(SELECT_USART1,recdata.rec_buf,0x00,0x00);
 	}else{//设备故障
 		response_pc_control(usart,recdata.rec_buf,reason,2);
 	}
@@ -334,7 +391,7 @@ static u8 Execute_Host_Comm(u8 usart)
 		crc=CRC_GetModbus16(Usart1_Control_Data.rxbuf,Usart1_Control_Data.rx_count-2);//帧结束尾不做校验
 		if((Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-2]+\
 				Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-1]*256 == crc)){	    
-				for(i = 0;i < 18;i++){
+				for(i = 0;i < 9;i++){
 							MCU_Rec.rec_buf[i] = Usart1_Control_Data.rxbuf[i];
 				 }//把数据复制给主机通讯结构体
 				resolve_host_command(SELECT_USART1, MCU_Rec,0x00,0x00);
@@ -351,7 +408,7 @@ static u8 Execute_Host_Comm(u8 usart)
 		crc=CRC_GetModbus16(Usart2_Control_Data.rxbuf,Usart2_Control_Data.rx_count-2);//帧结束尾不做校验
 		if((Usart2_Control_Data.rxbuf[Usart2_Control_Data.rx_count-2]+\
 				Usart2_Control_Data.rxbuf[Usart2_Control_Data.rx_count-1]*256 == crc)){	    
-				for(i = 0;i < 18;i++){
+				for(i = 0;i < 9;i++){
 							MCU_Rec.rec_buf[i] = Usart2_Control_Data.rxbuf[i];
 				 }//把数据复制给主机通讯结构体
 				resolve_host_command(SELECT_USART2, MCU_Rec,0x00,0x00);
@@ -363,7 +420,154 @@ static u8 Execute_Host_Comm(u8 usart)
 	}
 			return res;
 }
+void Group_Check_State(void)
+{
+	u8 i,j;
+	u16 crc;
+	if(Group_Check_Time == 0){
+			if((Group1.send_count > 0)&&(Usart3_Control_Data.tx_count == 0)){
+				for(i=0;i<GROUP_LINE_MAX;i++){
+					for(j=0;j<20;j++){
+						if((Group1.group_send[i].send_buf[2] != 0xFF)&&(Group1.group_send[i].send_buf[2] == (i+1))\
+							&&(Group1.group_send[i].send_buf[3] == (j+1))){  //行地址不等于0XFF时代表发送药，需要检查状态
+								Usart3_Control_Data.tx_count = 0;
+								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x04;
+								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x03;
+								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = Group1.group_send[i].control.line;
+								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = Group1.group_send[i].control.colum;
+								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = Group1.group_send[i].control.command;	
+								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = Group1.group_send[i].control.task;	
+								crc=CRC_GetModbus16(Usart3_Control_Data.txbuf,Usart3_Control_Data.tx_count);
+								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] =crc;
+								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] =crc>>8;
 
+								Usart3_Control_Data.tx_index = 0;
+								USART_SendData(USART3,Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_index++]);	
+								break;	
+						}						
+					}
+				}
+			}
+			
+			if((Group2.send_count > 0)&&(Usart4_Control_Data.tx_count == 0)){
+				for(i=0;i<GROUP_LINE_MAX;i++){
+					for(j=0;j<20;j++){
+						if((Group2.group_send[i].send_buf[2] != 0xFF)&&(Group2.group_send[i].send_buf[2] == (i+1))\
+							&&(Group2.group_send[i].send_buf[3] == (j+1))){  //行地址不等于0XFF时代表发送药，需要检查状态
+								Usart4_Control_Data.tx_count = 0;
+								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x04;
+								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x03;
+								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = Group2.group_send[i].control.line;
+								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = Group2.group_send[i].control.colum;
+								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = Group2.group_send[i].control.command;	
+								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = Group2.group_send[i].control.task;	
+								crc=CRC_GetModbus16(Usart4_Control_Data.txbuf,Usart4_Control_Data.tx_count);
+								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] =crc;
+								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] =crc>>8;
+
+								Usart4_Control_Data.tx_index = 0;
+								USART_SendData(UART4,Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_index++]);	
+								break;				
+						}
+					}
+				}
+			}
+		 Group_Check_Time = GROUP_CHECK_TIME;
+	}
+}
+u8 Execute_level_Comm(u8 PCusart,u8 GRusart)
+{
+	u8 res;
+	u8 i;
+	u16 crc;
+	if(GRusart == SELECT_USART3){
+		if((Usart3_Control_Data.rx_count < 10)||(Usart3_Control_Data.rxbuf[0] != 0x04)){
+			res = 2;
+			return res;
+		}
+		crc=CRC_GetModbus16(Usart3_Control_Data.rxbuf,Usart3_Control_Data.rx_count-2);//帧结束尾不做校验
+		if((Usart3_Control_Data.rxbuf[Usart3_Control_Data.rx_count-2]+\
+				Usart3_Control_Data.rxbuf[Usart3_Control_Data.rx_count-1]*256 == crc)){	 
+        if(Usart3_Control_Data.rxbuf[1] == 0x03){				
+						for(i = 0;i < 10;i++){
+									Group1.group_rec[Usart3_Control_Data.rxbuf[2]-1].rec_buf[i] = Usart3_Control_Data.rxbuf[i];
+						 }//把数据复制给主机通讯结构体
+						 if(Group1.group_rec[Usart3_Control_Data.rxbuf[2]-1].feedback.command != 2){
+							 switch(Group1.group_rec[Usart3_Control_Data.rxbuf[2]-1].feedback.result2){
+									case 0x01://正在发药
+										break;
+									case 0x02:
+									case 0x03:
+									case 0x04:
+										if(Group1.send_count == 2){
+												Group1.send_count = 2;
+											}
+										if(Group1.send_count > 0){
+											Group1.send_count--;
+										}
+										if(Group1.send_count == 0){ //行和列都要查询，目前这个功能还没有实现，应该分开行和列来计数
+											Group1.group_send[Usart3_Control_Data.rxbuf[2]-1].send_buf[2] = 0xFF;
+										}
+										Group1.group_send[Usart3_Control_Data.rxbuf[2]-1].send_buf[3] = 0xFF;
+										mcu_send_pc_status(PCusart,GRusart,Usart3_Control_Data.rxbuf,0x00,0x00);
+										break;
+									default:
+										break;
+							}
+						}else{
+
+						}
+				 }else if(Usart3_Control_Data.rxbuf[1] == 0x06){
+					 
+				 }
+				res = 0;
+		}else{
+// 				response_pc_control(SELECT_USART1,Usart1_Control_Data.rxbuf,0x00FF,1);
+				res = 1;
+		}
+	}else if(GRusart == SELECT_USART4){
+			if((Usart4_Control_Data.rx_count < 10)||(Usart4_Control_Data.rxbuf[0] != 0x04)){
+			res = 2;
+			return res;
+		}
+		crc=CRC_GetModbus16(Usart4_Control_Data.rxbuf,Usart4_Control_Data.rx_count-2);//帧结束尾不做校验
+		if((Usart4_Control_Data.rxbuf[Usart4_Control_Data.rx_count-2]+\
+				Usart4_Control_Data.rxbuf[Usart4_Control_Data.rx_count-1]*256 == crc)){	 
+        if(Usart4_Control_Data.rxbuf[1] == 0x03){				
+						for(i = 0;i < 10;i++){
+									Group2.group_rec[Usart4_Control_Data.rxbuf[2]-1].rec_buf[i] = Usart4_Control_Data.rxbuf[i];
+						 }//把数据复制给主机通讯结构体
+						 if(Group2.group_rec[Usart4_Control_Data.rxbuf[2]-1].feedback.command != 2){
+							 switch(Group2.group_rec[Usart4_Control_Data.rxbuf[2]-1].feedback.result2){
+									case 0x01://正在发药
+										break;
+									case 0x02:
+									case 0x03:
+									case 0x04:
+										if(Group2.send_count > 0){
+											Group2.send_count--;
+										}
+										Group2.group_send[Usart4_Control_Data.rxbuf[2]-1].send_buf[2] = 0xFF;
+										Group2.group_send[Usart4_Control_Data.rxbuf[2]-1].send_buf[3] = 0xFF;
+										mcu_send_pc_status(PCusart,GRusart,Usart4_Control_Data.rxbuf,0x00,0x00);
+										break;
+									default:
+										break;
+							}
+						}else{
+
+						}
+				 }else if(Usart4_Control_Data.rxbuf[1] == 0x06){
+					 
+				 }
+				res = 0;
+		}else{
+// 				response_pc_control(SELECT_USART1,Usart1_Control_Data.rxbuf,0x00FF,1);
+				res = 1;
+		}
+	}
+	return res;
+}
 //=============================================================================
 //函数名称:Respond_Host_Comm
 //功能概要:响应上位机的发出的数据命令，数据已经从串口一接收完整
@@ -388,33 +592,19 @@ void Communication_Process(void)
     }
 		if (1 == Usart3_Control_Data.rx_aframe){    
 	
+				Execute_level_Comm(SELECT_USART1,SELECT_USART3);
 				Usart3_Control_Data.rx_count = 0;
 				Auto_Frame_Time3 = AUTO_FRAME_TIMEOUT3;
 				Usart3_Control_Data.rx_aframe = 0;
 			
-// 				Usart3_Control_Data.tx_count = 0;
-// 				Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x01;
-// 				Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x58;
-// 				Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x00;
-// 				Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x06;			
-// 				Usart3_Control_Data.tx_index = 0;
-// 				USART_SendData(USART3,Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_index++]);
     }
 	  if (1 == Usart4_Control_Data.rx_aframe){    
-	
+				Execute_level_Comm(SELECT_USART1,SELECT_USART4);
 				Usart4_Control_Data.rx_count = 0;
 				Auto_Frame_Time4 = AUTO_FRAME_TIMEOUT4;
 				Usart4_Control_Data.rx_aframe = 0;
-			
-// 				Usart4_Control_Data.tx_count = 0;
-// 				Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x01;
-// 				Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x58;
-// 				Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x00;
-// 				Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x06;			
-// 				Usart4_Control_Data.tx_index = 0;
-// 				USART_SendData(UART4,Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_index++]);
     }
-		
+		Group_Check_State();
 }
 
 

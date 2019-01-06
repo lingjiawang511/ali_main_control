@@ -57,8 +57,8 @@ typedef uint32	ulong;		/**< 32-bit value */
 #define NANSWER_NUMOUT	 	 3	  //1000*5ms
 #define BAFFLE_ERR_TIMEOUT	400
 #define IRQ_TIMEOUT							4			//中断软件延时时间
-
-
+#define GROUP_CHECK_TIME				20		//中断软件延时时间
+#define GROUP_LINE_MAX					20
 /*************define type end*******************/
 
 /*************union type start*******************/
@@ -93,7 +93,7 @@ enum{
 	LGLEFT,LGRIGHT
 };
 enum{
-	NOSELECT_USART,SELECT_USART1,SELECT_USART2
+	NOSELECT_USART,SELECT_USART1,SELECT_USART2,SELECT_USART3,SELECT_USART4
 };
 typedef enum{
 	SLAVE,
@@ -223,7 +223,7 @@ typedef struct{
 }Communation_SlaveSend_Type;
 typedef union{
 	Communation_SlaveSend_Type feedback;
-	u8	rec_buf[9];	
+	u8	send_buf[9];	
 }COMM_SlaveSend_Union_Type;
 
 typedef struct{
@@ -237,7 +237,7 @@ typedef struct{
 }Communation_HostSend_Type;
 typedef union{
 	Communation_HostSend_Type control;
-	u8	rec_buf[9];	
+	u8	send_buf[9];	
 }COMM_HostSend_Union_Type;
 typedef struct{
 	u8  level_addr;
@@ -252,16 +252,18 @@ typedef struct{
 }Communation_HostRec_Type;
 typedef union{
 	Communation_HostRec_Type feedback;
-	u8	rec_buf[11];	
+	u8	rec_buf[10];	
 }COMM_HostRec_Union_Type;
 typedef struct {
 	u8 send_count;
 	u8 send_index;
 	u8 rec_count;
 	u8 rec_index;
-	COMM_HostSend_Union_Type	group_send[20];
-	COMM_HostRec_Union_Type		group_rec[20];
+	COMM_HostSend_Union_Type	group_send[GROUP_LINE_MAX];
+	COMM_HostRec_Union_Type		group_rec[GROUP_LINE_MAX];
 }Group_COMM_Type;
+
+
 typedef struct{
 	CH_Work_Enum_Type  state;
 	u8 	send_num;			//需要发药数，由PC机发送过来
@@ -384,6 +386,7 @@ extern Air_Controlr_Type Air_Control;
 extern Control_Baffle_Type Baffle_Control;
 extern u32 uiRoll_Paper_ON_Delay;
 extern u16 baffle_err_timeout;
+extern u16 Group_Check_Time ;
 /*************extern variable end*******************/
 
 /*************function start*******************/
