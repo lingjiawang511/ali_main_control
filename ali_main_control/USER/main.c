@@ -32,7 +32,7 @@ int main(void)
 		Key_Light_Init();
 		Belt_Config();
 		LED_GPIO_Config();
-// 		LGgate_GPIO_Config();
+		LRgate_GPIO_Config();
 	  sensor_init_sht1x();
 // 		EXTIX_Init();
     USART1_Config();
@@ -45,8 +45,8 @@ int main(void)
 		delay_ms(1000);
     while(1){
 			Communication_Process();
+			LRgate_Control();
 			read_TEMP_RH();
-// 			LGgate_Control();
 		}
         
 }

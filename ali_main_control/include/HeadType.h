@@ -92,10 +92,19 @@ enum{
 	READLOW,READHIGH
 };
 enum{
-	LGLEFT,LGRIGHT
+	GATELEFT,GATERIGHT
+};
+enum{
+	LGOPEN,LGCLOSE
+};
+enum{
+	GATECLOSE,GATEOPEN,GATEERR,GATEJAM,GATEOPENNING,GATECLOSING
 };
 enum{
 	NOSELECT_USART,SELECT_USART1,SELECT_USART2,SELECT_USART3,SELECT_USART4
+};
+enum{
+	BELT_STOP,BELT_LRUN,BELT_RRUN
 };
 typedef enum{
 	SLAVE,
@@ -285,15 +294,19 @@ typedef struct{
 typedef struct{
 	CH_Work_Enum_Type  state;
 	u8 	 dir;
+	u8 	 actual_state;
 	u8 	 send_time;
 	u16  actual_time;
 }Belt_Work_Type;
 typedef struct{
 	CH_Work_Enum_Type  state;
-	u8 	 lgdir;
+	u8 	 dir;
+	u8 	 action;
+	u8 	 Lactual_state;
+	u8 	 Ractual_state;
 	u8 	 send_time;
 	u16  actual_time;
-}LGgate_Work_Type;
+}LRgate_Work_Type;
 typedef struct{
 	CH_Work_Type ch1;
 	CH_Work_Type ch2;
@@ -379,7 +392,7 @@ extern  Answer_Type 	 PC_Answer;
 extern  CH_Work Channel;
 extern	Belt_Work_Type belt;
 
-
+extern LRgate_Work_Type lrgate;
 extern u8 Key_ScanNum;
 extern u8 Device_State;
 extern Printer_Type Printer;

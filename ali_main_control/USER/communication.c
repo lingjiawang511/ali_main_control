@@ -362,17 +362,20 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 								Belt_Speed(0,0,0);
 								belt.state = RESERVE;
 							  Start_Ok = 0;
+							  belt.actual_state = BELT_STOP;
 						 }else if(recdata.control.command == 0x10){
 								if(recdata.control.medicine_num == 0x00){
 										BELT_DIR = 1;
 										belt.state = RESERVE;
 										Start_Ok = 0;
 										Belt_Speed(1,1,1);
+									  belt.actual_state = BELT_LRUN;
 								}else{
 										belt.actual_time = recdata.control.medicine_num * 200;
 										belt.state = READY;
 										Start_Ok = 0;
 									  belt.dir = 1;
+									  belt.actual_state = BELT_LRUN;
 								}
 						 }else if(recdata.control.command == 0x20){
 								if(recdata.control.medicine_num == 0x00){
@@ -380,15 +383,27 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 										belt.state = RESERVE;
 										Start_Ok = 0;
 										Belt_Speed(1,1,1);
+									  belt.actual_state = BELT_RRUN;
 								}else{
 										belt.actual_time = recdata.control.medicine_num * 200;
 										belt.state = READY;
 										Start_Ok = 0;
 									  belt.dir = 0;
+										belt.actual_state = BELT_RRUN;
 								}
 						 }
 					}else if(recdata.control.colum == 0x22){//闸门控制
-						
+						if(recdata.control.command == 0x00){
+							lrgate.dir = GATELEFT;
+						}else{
+							lrgate.dir = GATELEFT;
+						}
+						if(recdata.control.medicine_num == 0x00){
+							lrgate.action = LGOPEN;
+						}else{
+							lrgate.action = LGCLOSE;
+						}
+						lrgate.state = READY;
 					}
 					break;
 				case 1:
@@ -408,9 +423,14 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 static void host_read_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 reason,u8 device_satate)
 {
 	u8 temp,humi;
+	u8 device_s1,device_s2;
 	 if(device_satate == 0){ //设备OK，解析并执行命令
 			switch(recdata.control.colum){
 				case 0x0F:
+					device_s1 = ((belt.actual_state&0x0F)<<4) + (lrgate.Lactual_state&0x0F);
+				  device_s2 = ((lrgate.Ractual_state&0x0F)<<4) + 0x00;//电动滚动是否有错误报警暂时不检测
+				  reason = device_s2*256 + device_s1;
+				  device_satate = 2;
 					break;
 				case 0x1F:
 // 						response_pc_control(usart,recdata.rec_buf,reason,device_satate);

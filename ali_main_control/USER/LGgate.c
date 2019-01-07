@@ -1,7 +1,38 @@
 #include "HeadType.h"	
 
-LGgate_Work_Type lggate;
+LRgate_Work_Type lrgate;
 
+
+void LRsensor_GPIO_Config(void)
+{
+	//定义一个GPIO_InitTypeDef 类型的结构体，名字叫GPIO_InitStructure 
+	GPIO_InitTypeDef  GPIO_InitStructure;
+
+	RCC_APB2PeriphClockCmd(LEFT_OPEN_RCC,ENABLE);
+	GPIO_InitStructure.GPIO_Pin = LEFT_OPEN_IO;		  
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; 		 
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(LEFT_OPEN_PORT, &GPIO_InitStructure);
+
+	RCC_APB2PeriphClockCmd(LEFT_CLOSE_RCC,ENABLE);
+	GPIO_InitStructure.GPIO_Pin = LEFT_CLOSE_IO;		  
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; 		 
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(LEFT_CLOSE_PORT, &GPIO_InitStructure);
+	
+	RCC_APB2PeriphClockCmd(RIGHT_OPEN_RCC,ENABLE);
+	GPIO_InitStructure.GPIO_Pin = RIGHT_OPEN_IO;		  
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; 		 
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(RIGHT_OPEN_PORT, &GPIO_InitStructure);
+	
+	RCC_APB2PeriphClockCmd(RIGHT_CLOSE_RCC,ENABLE);
+	GPIO_InitStructure.GPIO_Pin = RIGHT_CLOSE_IO;		  
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; 		 
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(RIGHT_CLOSE_PORT, &GPIO_InitStructure);
+	
+}
 //=============================================================================
 //函数名称:LGgate_GPIO_Config
 //功能概要:发药口1相关引脚配置
@@ -9,7 +40,7 @@ LGgate_Work_Type lggate;
 //函数返回:无
 //注意    :无
 //=============================================================================
- void LGgate_GPIO_Config(void)
+ void LRgate_GPIO_Config(void)
 {
 	//定义一个GPIO_InitTypeDef 类型的结构体，名字叫GPIO_InitStructure 
 	GPIO_InitTypeDef  GPIO_InitStructure;
@@ -37,49 +68,97 @@ LGgate_Work_Type lggate;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP; 		 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(B_RIGHT_GATE_PORT, &GPIO_InitStructure);
+	
+	LRsensor_GPIO_Config();
+	lrgate.state = RESERVE;
 }
-static u8 LGstart_Ok;
-void LGgate_Control(void)
+#define LGGATE_TIMEOUT	1000 
+void LRgate_Control(void)
 {
-	static u16 delay_time = 0;
-	switch(lggate.state){
-	case RESERVE:	lggate.actual_time = 1000;							
+// 	static u16 delay_time = 0;
+	switch(lrgate.state){
+	case RESERVE:	lrgate.actual_time = 0;							
 								break;
-	case READY:	if(LGstart_Ok == 0){
-
-						   }else{
-								  if(lggate.lgdir == LGLEFT){//此处需要通讯控制方向和时间
-										LEFT_GATE_OPEN;
-									}else if(lggate.lgdir == LGRIGHT){
-										RIGHT_GATE_OPEN;
+	case READY:	
+								 if(lrgate.dir == GATELEFT){//此处需要通讯控制方向和时间
+										if(lrgate.action == LGOPEN){
+												LEFT_GATE_OPEN;
+											  lrgate.Lactual_state = GATEOPENNING;
+										}else if(lrgate.action == LGCLOSE){
+												LEFT_GATE_CLOSE;
+											  lrgate.Lactual_state = GATECLOSING;
+										}
+									}else{
+										if(lrgate.action == LGOPEN){
+												RIGHT_GATE_OPEN;
+												lrgate.Ractual_state = GATEOPENNING;
+										}else if(lrgate.action == LGCLOSE){
+												RIGHT_GATE_CLOSE;
+												lrgate.Ractual_state = GATECLOSING;
+										}
 									}
-									lggate.state = WORKING;
-									delay_time = 0;
-							}
+									lrgate.actual_time = LGGATE_TIMEOUT;
+									lrgate.state = WORKING;
 								break ;	
-	case WORKING:if(LGstart_Ok == 1){
-									delay_time++; //将这个变量移到定时器中
-									if(delay_time >= lggate.actual_time){
-										lggate.state = END ;
-										delay_time = 0;
-									}
+	case WORKING://此处用定时器做超时处理，如果NS之后开关没有完成，则开关闸门出现故障
+								if(lrgate.actual_time == 0){
+										if(lrgate.Lactual_state == GATEOPENNING){
+												lrgate.state = END;
+											  LEFT_GATE_RELEASE;
+												lrgate.Lactual_state = GATEERR;											
+										}
 								}
+								if(lrgate.actual_time == 0){
+										if(lrgate.Ractual_state == GATEOPENNING){
+												lrgate.state = END;
+											  RIGHT_GATE_RELEASE;
+												lrgate.Ractual_state = GATEERR;											
+										}
+								}	
 								break;
 
-	case END:	if(LGstart_Ok == 1){
-								if(lggate.lgdir == LGLEFT){
-									LEFT_GATE_CLOSE;
-								}else if(lggate.lgdir == LGRIGHT){
-									RIGHT_GATE_CLOSE;
-								}								
-						}else{
+	case END:	
 								belt.state = RESERVE;
-						}
+
 								break ;	
 	default :
 								break;	
 	}	
 }
+
+void LRgate_sensor_irq(void )
+{
+	if(lrgate.Lactual_state == GATEOPENNING){
+		 if(READ_LOPEN_SENSOR == READHIGH){
+				LEFT_GATE_RELEASE;
+			 lrgate.Lactual_state = GATEOPEN;
+			 lrgate.state = END;
+		}
+	}
+	if(lrgate.Lactual_state == GATECLOSING){
+		 if(READ_LCLOSE_SENSOR == READHIGH){
+				LEFT_GATE_RELEASE;
+			 lrgate.Lactual_state = GATECLOSE;
+			 lrgate.state = END;
+		}
+	}
+	
+	if(lrgate.Ractual_state == GATEOPENNING){
+		 if(READ_ROPEN_SENSOR == READHIGH){
+				RIGHT_GATE_RELEASE;
+			  lrgate.Ractual_state = GATEOPEN;
+			  lrgate.state = END;
+		}
+	}
+	if(lrgate.Ractual_state == GATECLOSING){
+		 if(READ_RCLOSE_SENSOR == READHIGH){
+				RIGHT_GATE_RELEASE;
+			  lrgate.Ractual_state = GATECLOSE;
+			  lrgate.state = END;
+		}
+	}	
+}
+
 
 
 

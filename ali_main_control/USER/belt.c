@@ -146,7 +146,8 @@ void Belt_Control(void)
 	static u16 delay_time = 0;
 	switch(belt.state){
 	case RESERVE:
-// 								belt.actual_time = 1000;							
+// 								belt.actual_time = 1000;	
+								belt.actual_state = BELT_STOP;
 								break;
 	case READY:	if(Start_Ok == 0){
 		            if(belt.dir == 1){
