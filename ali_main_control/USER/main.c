@@ -19,8 +19,10 @@ void delay_ms1(u16 ms)
 }
 void read_TEMP_RH(void)
 {
-	if(fsm_cpl == (*(read_sensor_hook))(&param)) {
-
+	if(sht10_read_time == 0){
+		if(fsm_cpl == (*(read_sensor_hook))(&param)) {
+			sht10_read_time = SHT10_READ_TIME;
+		}
 	}
 }
 //配置时钟在target宏定义

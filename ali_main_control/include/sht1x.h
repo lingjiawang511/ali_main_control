@@ -1,6 +1,8 @@
 #ifndef SHT1X_H
 #define SHT1X_H
 
+#define SHT10_READ_TIME			1000   //5s钟读一次
+
 #define				SHT10_SCK_IO					GPIO_Pin_6 //和原理图调换一下
 #define				SHT10_SCK_PORT			  GPIOB
 #define				SHT10_SCK_RCC					RCC_APB2Periph_GPIOB
@@ -44,6 +46,7 @@ typedef fsm_t (*pread_sensor)(tag_param *);
 #define RESET        0x1e   //000   1111    0
 
 extern pread_sensor read_sensor_hook;
+extern unsigned int sht10_read_time;
 
 void sht10_rst(void);
 void sht10_star(void);

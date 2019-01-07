@@ -451,7 +451,7 @@ void Group_Check_State(void)
 			
 			if((Group2.send_count > 0)&&(Usart4_Control_Data.tx_count == 0)){
 				for(i=0;i<GROUP_LINE_MAX;i++){
-					for(j=0;j<20;j++){
+					for(j=0;j<GROUP_COLUM_MAX;j++){
 						if((Group2.group_send[i][j].send_buf[2] != 0xFF)&&(Group2.group_send[i][j].send_buf[2] == (i+1))\
 							&&(Group2.group_send[i][j].send_buf[3] == (j+1))){  //行地址不等于0XFF时代表发送药，需要检查状态
 								Usart4_Control_Data.tx_count = 0;
@@ -499,9 +499,6 @@ u8 Execute_level_Comm(u8 PCusart,u8 GRusart)
 									case 0x02:
 									case 0x03:
 									case 0x04:
-										if(Group1.send_count == 2){
-												Group1.send_count = 2;
-											}
 										if(Group1.send_count > 0){
 											Group1.send_count--;
 										}

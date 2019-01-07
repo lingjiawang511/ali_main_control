@@ -15,7 +15,9 @@ Copyrigth:        (c) Sensirion AG
 
 #include"HeadType.h"	
 #include "sht1x.h"
+
 #define SHT10_USE_LOW_RESOLUTION    0
+unsigned int sht10_read_time;
 double log(double a)
 {
     int N = 15;
