@@ -325,7 +325,7 @@ static u8 group_send_medicine(u8 group,COMM_SlaveRec_Union_Type recdata)
 		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] =crc;
 		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] =crc>>8;
 		for(i=0;i<Usart3_Control_Data.tx_count;i++){//复制需要发送给水平板的数据到数组中，当接收到发药状态时清零
-			Group1.group_send[recdata.control.line -1].send_buf[i] = Usart3_Control_Data.txbuf[i];
+			Group1.group_send[recdata.control.line -1][recdata.control.colum -1].send_buf[i] = Usart3_Control_Data.txbuf[i];
 		}
 		Group1.send_count++;
 		Usart3_Control_Data.tx_index = 0;
@@ -343,7 +343,7 @@ static u8 group_send_medicine(u8 group,COMM_SlaveRec_Union_Type recdata)
 		Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] =crc;
 		Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] =crc>>8;
 		for(i=0;i<Usart4_Control_Data.tx_count;i++){//复制需要发送给水平板的数据到数组中，当接收到发药状态时清零
-			Group2.group_send[recdata.control.line -1].send_buf[i] = Usart4_Control_Data.txbuf[i];
+			Group2.group_send[recdata.control.line -1][recdata.control.colum -1].send_buf[i] = Usart4_Control_Data.txbuf[i];
 		}		
 		Group2.send_count++;
 		Usart4_Control_Data.tx_index = 0;
@@ -427,16 +427,16 @@ void Group_Check_State(void)
 	if(Group_Check_Time == 0){
 			if((Group1.send_count > 0)&&(Usart3_Control_Data.tx_count == 0)){
 				for(i=0;i<GROUP_LINE_MAX;i++){
-					for(j=0;j<20;j++){
-						if((Group1.group_send[i].send_buf[2] != 0xFF)&&(Group1.group_send[i].send_buf[2] == (i+1))\
-							&&(Group1.group_send[i].send_buf[3] == (j+1))){  //行地址不等于0XFF时代表发送药，需要检查状态
+					for(j=0;j<GROUP_COLUM_MAX;j++){
+						if((Group1.group_send[i][j].send_buf[3] != 0xFF)&&(Group1.group_send[i][j].send_buf[2] == (i+1))\
+							&&(Group1.group_send[i][j].send_buf[3] == (j+1))){  //行地址不等于0XFF时代表发送药，需要检查状态
 								Usart3_Control_Data.tx_count = 0;
 								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x04;
 								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x03;
-								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = Group1.group_send[i].control.line;
-								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = Group1.group_send[i].control.colum;
-								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = Group1.group_send[i].control.command;	
-								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = Group1.group_send[i].control.task;	
+								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = Group1.group_send[i][j].control.line;
+								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = Group1.group_send[i][j].control.colum;
+								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = Group1.group_send[i][j].control.command;	
+								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = Group1.group_send[i][j].control.task;	
 								crc=CRC_GetModbus16(Usart3_Control_Data.txbuf,Usart3_Control_Data.tx_count);
 								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] =crc;
 								Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] =crc>>8;
@@ -452,15 +452,15 @@ void Group_Check_State(void)
 			if((Group2.send_count > 0)&&(Usart4_Control_Data.tx_count == 0)){
 				for(i=0;i<GROUP_LINE_MAX;i++){
 					for(j=0;j<20;j++){
-						if((Group2.group_send[i].send_buf[2] != 0xFF)&&(Group2.group_send[i].send_buf[2] == (i+1))\
-							&&(Group2.group_send[i].send_buf[3] == (j+1))){  //行地址不等于0XFF时代表发送药，需要检查状态
+						if((Group2.group_send[i][j].send_buf[2] != 0xFF)&&(Group2.group_send[i][j].send_buf[2] == (i+1))\
+							&&(Group2.group_send[i][j].send_buf[3] == (j+1))){  //行地址不等于0XFF时代表发送药，需要检查状态
 								Usart4_Control_Data.tx_count = 0;
 								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x04;
 								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x03;
-								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = Group2.group_send[i].control.line;
-								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = Group2.group_send[i].control.colum;
-								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = Group2.group_send[i].control.command;	
-								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = Group2.group_send[i].control.task;	
+								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = Group2.group_send[i][j].control.line;
+								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = Group2.group_send[i][j].control.colum;
+								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = Group2.group_send[i][j].control.command;	
+								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = Group2.group_send[i][j].control.task;	
 								crc=CRC_GetModbus16(Usart4_Control_Data.txbuf,Usart4_Control_Data.tx_count);
 								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] =crc;
 								Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] =crc>>8;
@@ -490,10 +490,10 @@ u8 Execute_level_Comm(u8 PCusart,u8 GRusart)
 				Usart3_Control_Data.rxbuf[Usart3_Control_Data.rx_count-1]*256 == crc)){	 
         if(Usart3_Control_Data.rxbuf[1] == 0x03){				
 						for(i = 0;i < 10;i++){
-									Group1.group_rec[Usart3_Control_Data.rxbuf[2]-1].rec_buf[i] = Usart3_Control_Data.rxbuf[i];
+									Group1.group_rec[Usart3_Control_Data.rxbuf[2]-1][Usart3_Control_Data.rxbuf[3]-1].rec_buf[i] = Usart3_Control_Data.rxbuf[i];
 						 }//把数据复制给主机通讯结构体
-						 if(Group1.group_rec[Usart3_Control_Data.rxbuf[2]-1].feedback.command != 2){
-							 switch(Group1.group_rec[Usart3_Control_Data.rxbuf[2]-1].feedback.result2){
+						 if(Group1.group_rec[Usart3_Control_Data.rxbuf[2]-1][Usart3_Control_Data.rxbuf[3]-1].feedback.command != 2){
+							 switch(Group1.group_rec[Usart3_Control_Data.rxbuf[2]-1][Usart3_Control_Data.rxbuf[3]-1].feedback.result2){
 									case 0x01://正在发药
 										break;
 									case 0x02:
@@ -505,10 +505,10 @@ u8 Execute_level_Comm(u8 PCusart,u8 GRusart)
 										if(Group1.send_count > 0){
 											Group1.send_count--;
 										}
-										if(Group1.send_count == 0){ //行和列都要查询，目前这个功能还没有实现，应该分开行和列来计数
-											Group1.group_send[Usart3_Control_Data.rxbuf[2]-1].send_buf[2] = 0xFF;
-										}
-										Group1.group_send[Usart3_Control_Data.rxbuf[2]-1].send_buf[3] = 0xFF;
+// 										if(Group1.send_count == 0){ //行和列都要查询，目前这个功能还没有实现，应该分开行和列来计数
+// 											Group1.group_send[Usart3_Control_Data.rxbuf[2]-1][Usart3_Control_Data.rxbuf[3]-1].send_buf[2] = 0xFF;
+// 										}
+										Group1.group_send[Usart3_Control_Data.rxbuf[2]-1][Usart3_Control_Data.rxbuf[3]-1].send_buf[3] = 0xFF;
 										mcu_send_pc_status(PCusart,GRusart,Usart3_Control_Data.rxbuf,0x00,0x00);
 										break;
 									default:
@@ -535,10 +535,10 @@ u8 Execute_level_Comm(u8 PCusart,u8 GRusart)
 				Usart4_Control_Data.rxbuf[Usart4_Control_Data.rx_count-1]*256 == crc)){	 
         if(Usart4_Control_Data.rxbuf[1] == 0x03){				
 						for(i = 0;i < 10;i++){
-									Group2.group_rec[Usart4_Control_Data.rxbuf[2]-1].rec_buf[i] = Usart4_Control_Data.rxbuf[i];
+									Group2.group_rec[Usart4_Control_Data.rxbuf[2]-1][Usart4_Control_Data.rxbuf[3]-1].rec_buf[i] = Usart4_Control_Data.rxbuf[i];
 						 }//把数据复制给主机通讯结构体
-						 if(Group2.group_rec[Usart4_Control_Data.rxbuf[2]-1].feedback.command != 2){
-							 switch(Group2.group_rec[Usart4_Control_Data.rxbuf[2]-1].feedback.result2){
+						 if(Group2.group_rec[Usart4_Control_Data.rxbuf[2]-1][Usart4_Control_Data.rxbuf[3]-1].feedback.command != 2){
+							 switch(Group2.group_rec[Usart4_Control_Data.rxbuf[2]-1][Usart4_Control_Data.rxbuf[3]-1].feedback.result2){
 									case 0x01://正在发药
 										break;
 									case 0x02:
@@ -547,8 +547,8 @@ u8 Execute_level_Comm(u8 PCusart,u8 GRusart)
 										if(Group2.send_count > 0){
 											Group2.send_count--;
 										}
-										Group2.group_send[Usart4_Control_Data.rxbuf[2]-1].send_buf[2] = 0xFF;
-										Group2.group_send[Usart4_Control_Data.rxbuf[2]-1].send_buf[3] = 0xFF;
+// 										Group2.group_send[Usart4_Control_Data.rxbuf[2]-1][Usart4_Control_Data.rxbuf[3]-1].send_buf[2] = 0xFF;
+										Group2.group_send[Usart4_Control_Data.rxbuf[2]-1][Usart4_Control_Data.rxbuf[3]-1].send_buf[3] = 0xFF;
 										mcu_send_pc_status(PCusart,GRusart,Usart4_Control_Data.rxbuf,0x00,0x00);
 										break;
 									default:

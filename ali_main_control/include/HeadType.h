@@ -59,6 +59,7 @@ typedef uint32	ulong;		/**< 32-bit value */
 #define IRQ_TIMEOUT							4			//中断软件延时时间
 #define GROUP_CHECK_TIME				20		//中断软件延时时间
 #define GROUP_LINE_MAX					20
+#define GROUP_COLUM_MAX					16
 /*************define type end*******************/
 
 /*************union type start*******************/
@@ -255,12 +256,12 @@ typedef union{
 	u8	rec_buf[10];	
 }COMM_HostRec_Union_Type;
 typedef struct {
-	u8 send_count;
+	u16 send_count;
 	u8 send_index;
 	u8 rec_count;
 	u8 rec_index;
-	COMM_HostSend_Union_Type	group_send[GROUP_LINE_MAX];
-	COMM_HostRec_Union_Type		group_rec[GROUP_LINE_MAX];
+	COMM_HostSend_Union_Type	group_send[GROUP_LINE_MAX][GROUP_COLUM_MAX];
+	COMM_HostRec_Union_Type		group_rec[GROUP_LINE_MAX][GROUP_COLUM_MAX];
 }Group_COMM_Type;
 
 
