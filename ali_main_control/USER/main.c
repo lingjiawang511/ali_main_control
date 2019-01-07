@@ -34,7 +34,7 @@ int main(void)
 		LED_GPIO_Config();
 		LRgate_GPIO_Config();
 	  sensor_init_sht1x();
-// 		EXTIX_Init();
+		EXTIX_Init();
     USART1_Config();
 		USART2_Config();
 		USART3_Config();
@@ -45,8 +45,8 @@ int main(void)
 		delay_ms(1000);
     while(1){
 			Communication_Process();
-			LRgate_Control();
-			read_TEMP_RH();
+// 			LRgate_Control();
+// 			read_TEMP_RH();
 		}
         
 }

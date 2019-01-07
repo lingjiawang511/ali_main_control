@@ -45,10 +45,10 @@ typedef uint32	ulong;		/**< 32-bit value */
 #define RxBufMax 512
 #define TxBufMax 512
 /*自动成帧超时定时时间*/
-#define AUTO_FRAME_TIMEOUT1  10  //10*2ms
-#define AUTO_FRAME_TIMEOUT2  10  //10*2ms
-#define AUTO_FRAME_TIMEOUT3  10  //10*2ms
-#define AUTO_FRAME_TIMEOUT4  10  //10*2ms
+#define AUTO_FRAME_TIMEOUT1  6  //10*2ms
+#define AUTO_FRAME_TIMEOUT2  6  //10*2ms
+#define AUTO_FRAME_TIMEOUT3  6  //10*2ms
+#define AUTO_FRAME_TIMEOUT4  6  //10*2ms
 /*自动成帧超时定时时间*/
 //响应超时时间，即上位机确认二维码正确后扫描枪一直扫描直到得到下一次数据的最长时间
 #define ANSWER_SCANTIME	 	 4000	  //4000*5ms
@@ -57,7 +57,7 @@ typedef uint32	ulong;		/**< 32-bit value */
 #define NANSWER_NUMOUT	 	 3	  //1000*5ms
 #define BAFFLE_ERR_TIMEOUT	400
 #define IRQ_TIMEOUT							4			//中断软件延时时间
-#define GROUP_CHECK_TIME				20		//中断软件延时时间
+#define GROUP_CHECK_TIME				40		//中断软件延时时间
 #define GROUP_LINE_MAX					20
 #define GROUP_COLUM_MAX					16
 #define SOFTWARE_VERSIONS			  0X5001  //通讯小端模式，版本号大端模式，所以0x5001 = V01.50

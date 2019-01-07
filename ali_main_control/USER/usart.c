@@ -127,7 +127,7 @@ static void USART3_Interrupts_Config(void)
      NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); 
     
      NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
-     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
      NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
      NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
      NVIC_Init(&NVIC_InitStructure);
@@ -145,7 +145,7 @@ static void USART4_Interrupts_Config(void)
      NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); 
     
      NVIC_InitStructure.NVIC_IRQChannel = UART4_IRQn;
-     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
+     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
      NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;
      NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
      NVIC_Init(&NVIC_InitStructure);

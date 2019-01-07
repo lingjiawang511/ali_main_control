@@ -213,7 +213,7 @@ static void response_pc_control(u8 usart,u8 *prdata,u16 reason,u8 MCUstate)
 		  while(Usart1_Control_Data.tx_count!=0);
 			Usart1_Control_Data.tx_count = 0;
 		  Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = *prdata++;
-		  if(MCUstate == 0){
+		  if(MCUstate != 1){
 				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = *prdata++;
 			}else{
 				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x80 + *prdata++;
@@ -240,7 +240,7 @@ static void response_pc_control(u8 usart,u8 *prdata,u16 reason,u8 MCUstate)
 		  while(Usart2_Control_Data.tx_count!=0);
 		  Usart2_Control_Data.tx_count = 0;
 		  Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = *prdata++;
-		  if(MCUstate == 0){
+		  if(MCUstate != 1){
 				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = *prdata++;
 			}else{
 				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x80 + *prdata++;
@@ -415,7 +415,7 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 				default:
 					break;
 			}
-			response_pc_control(SELECT_USART1,recdata.rec_buf,0x00,0x00);
+			response_pc_control(usart,recdata.rec_buf,0x00,0x00);
 	}else{//设备故障
 		response_pc_control(usart,recdata.rec_buf,reason,2);
 	}
@@ -495,7 +495,11 @@ static u8 Execute_Host_Comm(u8 usart)
 				for(i = 0;i < 9;i++){
 							MCU_Rec.rec_buf[i] = Usart2_Control_Data.rxbuf[i];
 				 }//把数据复制给主机通讯结构体
-				resolve_host_command(SELECT_USART2, MCU_Rec,0x00,0x00);
+				if(MCU_Rec.control.function == 0x06){
+						resolve_host_command(SELECT_USART2, MCU_Rec,0x00,0x00);
+				}else if(MCU_Rec.control.function == 0x03){
+						host_read_command(SELECT_USART2,MCU_Rec,0x00,0x00);
+				}
 				res = 0;
 		}else{
 				response_pc_control(SELECT_USART2,Usart2_Control_Data.rxbuf,0x00FF,1);
@@ -531,6 +535,7 @@ void Group_Check_State(void)
 						}						
 					}
 				}
+// 								Group1.send_count--;
 			}
 			
 			if((Group2.send_count > 0)&&(Usart4_Control_Data.tx_count == 0)){
@@ -555,6 +560,7 @@ void Group_Check_State(void)
 						}
 					}
 				}
+// 				Group2.send_count--;
 			}
 		 Group_Check_Time = GROUP_CHECK_TIME;
 	}
@@ -680,7 +686,7 @@ void Communication_Process(void)
 			
     }
 	  if (1 == Usart4_Control_Data.rx_aframe){    
-				Execute_level_Comm(SELECT_USART1,SELECT_USART4);
+ 				Execute_level_Comm(SELECT_USART1,SELECT_USART4);
 				Usart4_Control_Data.rx_count = 0;
 				Auto_Frame_Time4 = AUTO_FRAME_TIMEOUT4;
 				Usart4_Control_Data.rx_aframe = 0;

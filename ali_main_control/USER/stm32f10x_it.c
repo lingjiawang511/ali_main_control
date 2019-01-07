@@ -191,7 +191,7 @@ void TIM3_IRQHandler(void)
             }else{
                 Auto_Frame_Time2 = 0;
                 Usart2_Control_Data.rx_aframe = 1; 
-                Usart2_Control_Data.rx_count = Usart3_Control_Data.rx_index;
+                Usart2_Control_Data.rx_count = Usart2_Control_Data.rx_index;
                 Usart2_Control_Data.rx_start = 0;
                 Usart2_Control_Data.rx_index = 0;
             }
@@ -251,7 +251,7 @@ void USART2_IRQHandler(void)
 {
   
 	if(USART_GetFlagStatus(USART2, USART_FLAG_RXNE)||USART_GetFlagStatus(USART2, USART_FLAG_ORE) != RESET){ //解决数据没接收完一直进中断的问题
-       USART2_Do_Rx(USART_ReceiveData(USART1));
+       USART2_Do_Rx(USART_ReceiveData(USART2));
        USART_ClearFlag(USART2,USART_FLAG_RXNE);
 	}
 	if(USART_GetFlagStatus(USART2, USART_FLAG_TC)){
