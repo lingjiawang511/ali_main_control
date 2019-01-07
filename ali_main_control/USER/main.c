@@ -47,7 +47,7 @@ int main(void)
     while(1){
 			Communication_Process();
 			LRgate_Control();
-// 			read_TEMP_RH();
+			read_TEMP_RH();
 		}
         
 }

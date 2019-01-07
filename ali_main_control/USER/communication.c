@@ -12,6 +12,7 @@ COMM_SlaveSend_Union_Type 	MCU_Send;
 // COMM_HostRec_Union_Type  		Group1_Rec,Group2_Rec;
 Group_COMM_Type Group1,Group2;
 u16 Group_Check_Time = 40;  //200ms
+static u8 pc_use_usart = 1;
 //=============================================================================
 //函数名称:SLAVE_Rec_Comm
 //功能概要:PC作为通讯主机时接收的控制字处理并响应
@@ -408,9 +409,19 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 					break;
 				case 1:
 					group_send_medicine(1,recdata);
+				  if(usart == SELECT_USART1){
+						pc_use_usart = SELECT_USART1;
+					}else if(usart == SELECT_USART2){
+						pc_use_usart = SELECT_USART2;
+					}
 					break;
 				case 2:
 					group_send_medicine(2,recdata);
+					if(usart == SELECT_USART1){
+						pc_use_usart = SELECT_USART1;
+					}else if(usart == SELECT_USART2){
+						pc_use_usart = SELECT_USART2;
+					}
 					break;
 				default:
 					break;
@@ -679,14 +690,14 @@ void Communication_Process(void)
     }
 		if (1 == Usart3_Control_Data.rx_aframe){    
 	
-				Execute_level_Comm(SELECT_USART1,SELECT_USART3);
+				Execute_level_Comm(pc_use_usart,SELECT_USART3);
 				Usart3_Control_Data.rx_count = 0;
 				Auto_Frame_Time3 = AUTO_FRAME_TIMEOUT3;
 				Usart3_Control_Data.rx_aframe = 0;
 			
     }
 	  if (1 == Usart4_Control_Data.rx_aframe){    
- 				Execute_level_Comm(SELECT_USART1,SELECT_USART4);
+ 				Execute_level_Comm(pc_use_usart,SELECT_USART4);
 				Usart4_Control_Data.rx_count = 0;
 				Auto_Frame_Time4 = AUTO_FRAME_TIMEOUT4;
 				Usart4_Control_Data.rx_aframe = 0;
