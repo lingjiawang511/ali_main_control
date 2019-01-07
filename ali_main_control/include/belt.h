@@ -4,6 +4,7 @@
 #include "stm32f10x.h"
 #include "delay.h"
 
+
 #define	BELT_SPEED1_IO				GPIO_Pin_1
 #define	BELT_SPEED1_PORT			GPIOA
 #define	BELT_SPEED2_IO				GPIO_Pin_12
@@ -30,6 +31,7 @@
 #define BELT_SPEED2 					PCout(12)
 #define BELT_SPEED3						PDout(2)
 #define BELT_DIR 							PAout(0)
+
 // #define BELT_ERR 							PCout(10)// PB5
 
 #define Belt_Speed(x3,x2,x1)	do{	BELT_SPEED1 = x1;BELT_SPEED1 = x2;BELT_SPEED1 = x3;}while(0)
@@ -42,7 +44,7 @@
 
 
 
-
+extern u8 Start_Ok;
 void Belt_Config(void);
 void Belt_Control(void);
 

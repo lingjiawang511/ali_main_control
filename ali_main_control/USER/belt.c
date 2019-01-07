@@ -1,7 +1,7 @@
 #include "HeadType.h"	
 
 static u8 Speed_Step;
-static u8 Start_Ok;
+u8 Start_Ok;
 u8 Send_Medicine_Finish_State;		//所有通道发药完成状态，避免发药没完成，皮带就停止了
 //=============================================================================
 //函数名称:Send_Medicine1_Config
@@ -145,7 +145,8 @@ void Belt_Control(void)
 {
 	static u16 delay_time = 0;
 	switch(belt.state){
-	case RESERVE:	belt.actual_time = 1000;							
+	case RESERVE:
+// 								belt.actual_time = 1000;							
 								break;
 	case READY:	if(Start_Ok == 0){
 		            if(belt.dir == 1){

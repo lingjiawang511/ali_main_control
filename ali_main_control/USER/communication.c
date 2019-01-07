@@ -357,6 +357,39 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 	 if(device_satate == 0){ //设备OK，解析并执行命令
 			switch(recdata.control.group_name){
 				case 0://其他控制
+					if(recdata.control.colum == 0x11){  //皮带控制
+						 if(recdata.control.command == 0x00){
+								Belt_Speed(0,0,0);
+								belt.state = RESERVE;
+							  Start_Ok = 0;
+						 }else if(recdata.control.command == 0x10){
+								if(recdata.control.medicine_num == 0x00){
+										BELT_DIR = 1;
+										belt.state = RESERVE;
+										Start_Ok = 0;
+										Belt_Speed(1,1,1);
+								}else{
+										belt.actual_time = recdata.control.medicine_num * 200;
+										belt.state = READY;
+										Start_Ok = 0;
+									  belt.dir = 1;
+								}
+						 }else if(recdata.control.command == 0x20){
+								if(recdata.control.medicine_num == 0x00){
+										BELT_DIR = 0;
+										belt.state = RESERVE;
+										Start_Ok = 0;
+										Belt_Speed(1,1,1);
+								}else{
+										belt.actual_time = recdata.control.medicine_num * 200;
+										belt.state = READY;
+										Start_Ok = 0;
+									  belt.dir = 0;
+								}
+						 }
+					}else if(recdata.control.colum == 0x22){//闸门控制
+						
+					}
 					break;
 				case 1:
 					group_send_medicine(1,recdata);
