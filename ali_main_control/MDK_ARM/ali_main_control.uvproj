@@ -452,14 +452,14 @@
               <FilePath>..\USER\communication.c</FilePath>
             </File>
             <File>
-              <FileName>SHT1X.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\USER\SHT1X.c</FilePath>
-            </File>
-            <File>
               <FileName>LGgate.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\USER\LGgate.c</FilePath>
+            </File>
+            <File>
+              <FileName>SHT1X.lib</FileName>
+              <FileType>4</FileType>
+              <FilePath>..\USER\SHT1X.lib</FilePath>
             </File>
           </Files>
         </Group>

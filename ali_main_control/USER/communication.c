@@ -1,4 +1,5 @@
 #include"HeadType.h"
+#include "sht1x.h"
 
 MCU_State_Type MCU_State;
 Answer_Type 	 PC_Answer;
@@ -226,9 +227,9 @@ static void response_pc_control(u8 usart,u8 *prdata,u16 reason,u8 MCUstate)
 			}else if(MCUstate == 1){//CRC错误
 				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
 				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0xFF;
-			}else if(MCUstate ==2){//其他故障发生时，回复上位机
-				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =reason >>8;
-				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =reason;				
+			}else if(MCUstate ==2){//其他故障发生时，回复上位机,或者读取数据
+				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =reason;
+				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =reason>>8;				
 			}
 			crc=CRC_GetModbus16(Usart1_Control_Data.txbuf,Usart1_Control_Data.tx_count);
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =crc;
@@ -254,8 +255,8 @@ static void response_pc_control(u8 usart,u8 *prdata,u16 reason,u8 MCUstate)
 				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x00;
 				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0xFF;
 			}else if(MCUstate ==2){//其他故障发生时，回复上位机
-				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =reason >>8;
-				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =reason;				
+				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =reason;
+				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =reason>>8;				
 			}
 			crc=CRC_GetModbus16(Usart2_Control_Data.txbuf,Usart2_Control_Data.tx_count);
 			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =crc;
@@ -371,6 +372,32 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 		response_pc_control(usart,recdata.rec_buf,reason,2);
 	}
 }
+static void host_read_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 reason,u8 device_satate)
+{
+	u8 temp,humi;
+	 if(device_satate == 0){ //设备OK，解析并执行命令
+			switch(recdata.control.colum){
+				case 0x0F:
+					break;
+				case 0x1F:
+// 						response_pc_control(usart,recdata.rec_buf,reason,device_satate);
+				   temp = (u8)(param.temperatureC/10);
+				   humi = (u8)(param.humidityRH/10);
+				   reason = humi*256 + temp;
+				   device_satate = 2;
+					break;
+				case 0X63:
+				   reason = SOFTWARE_VERSIONS;
+				   device_satate = 2;
+					break;
+				default:
+					break;
+			}
+			response_pc_control(usart,recdata.rec_buf,reason,device_satate);
+	}else{//设备故障
+		response_pc_control(usart,recdata.rec_buf,reason,2);
+	}
+}
 //=============================================================================
 //函数名称:Execute_Host_Comm
 //功能概要:执行上位机发出的命令
@@ -390,11 +417,15 @@ static u8 Execute_Host_Comm(u8 usart)
 		}
 		crc=CRC_GetModbus16(Usart1_Control_Data.rxbuf,Usart1_Control_Data.rx_count-2);//帧结束尾不做校验
 		if((Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-2]+\
-				Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-1]*256 == crc)){	    
+				Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-1]*256 == crc)){	
 				for(i = 0;i < 9;i++){
 							MCU_Rec.rec_buf[i] = Usart1_Control_Data.rxbuf[i];
 				 }//把数据复制给主机通讯结构体
-				resolve_host_command(SELECT_USART1, MCU_Rec,0x00,0x00);
+				if(MCU_Rec.control.function == 0x06){
+						resolve_host_command(SELECT_USART1, MCU_Rec,0x00,0x00);
+				}else if(MCU_Rec.control.function == 0x03){
+						host_read_command(SELECT_USART1,MCU_Rec,0x00,0x00);
+				}
 				res = 0;
 		}else{
 				response_pc_control(SELECT_USART1,Usart1_Control_Data.rxbuf,0x00FF,1);
