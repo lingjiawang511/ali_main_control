@@ -402,6 +402,7 @@ extern Control_Baffle_Type Baffle_Control;
 extern u32 uiRoll_Paper_ON_Delay;
 extern u16 baffle_err_timeout;
 extern u16 Group_Check_Time ;
+extern unsigned int sht10_read_time;
 /*************extern variable end*******************/
 
 /*************function start*******************/

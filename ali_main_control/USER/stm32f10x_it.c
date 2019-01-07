@@ -25,6 +25,7 @@
 #include "stm32f10x_it.h"
 #include"HeadType.h"
 #include "usart.h"
+// #include "sht1x.h"
 
 /** @addtogroup STM32F10x_StdPeriph_Template
   * @{
@@ -150,11 +151,16 @@ void TIM2_IRQHandler(void)
 		Led_Flash();
 		Belt_Control();
 		Key_Light_Dispose();
-
+		LRgate_sensor_irq();
     if(Group_Check_Time > 0){
       Group_Check_Time--;
     }
-		
+		if(sht10_read_time > 0){
+			sht10_read_time--;
+		}	
+		if(lrgate.actual_time > 0){
+			lrgate.actual_time--;
+		}
 		TIM_ClearITPendingBit(TIM2 , TIM_FLAG_Update);  		 
 	}		 	
 }

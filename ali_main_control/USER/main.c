@@ -7,6 +7,7 @@ Belt_Work_Type belt;
 Printer_Type Printer;
 Control_Input_Type Control;
 tag_param param = {0};
+unsigned int sht10_read_time;
 void delay_ms1(u16 ms)
 {
 	u16  i;
@@ -45,7 +46,7 @@ int main(void)
 		delay_ms(1000);
     while(1){
 			Communication_Process();
-// 			LRgate_Control();
+			LRgate_Control();
 // 			read_TEMP_RH();
 		}
         

@@ -1,4 +1,5 @@
 #include"HeadType.h"
+#include "sht1x.h"
 
 MCU_State_Type MCU_State;
 Answer_Type 	 PC_Answer;
@@ -212,7 +213,7 @@ static void response_pc_control(u8 usart,u8 *prdata,u16 reason,u8 MCUstate)
 		  while(Usart1_Control_Data.tx_count!=0);
 			Usart1_Control_Data.tx_count = 0;
 		  Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = *prdata++;
-		  if(MCUstate == 0){
+		  if(MCUstate != 1){
 				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = *prdata++;
 			}else{
 				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x80 + *prdata++;
@@ -226,9 +227,9 @@ static void response_pc_control(u8 usart,u8 *prdata,u16 reason,u8 MCUstate)
 			}else if(MCUstate == 1){//CRC错误
 				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
 				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0xFF;
-			}else if(MCUstate ==2){//其他故障发生时，回复上位机
-				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =reason >>8;
-				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =reason;				
+			}else if(MCUstate ==2){//其他故障发生时，回复上位机,或者读取数据
+				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =reason;
+				Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =reason>>8;				
 			}
 			crc=CRC_GetModbus16(Usart1_Control_Data.txbuf,Usart1_Control_Data.tx_count);
 			Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =crc;
@@ -239,7 +240,7 @@ static void response_pc_control(u8 usart,u8 *prdata,u16 reason,u8 MCUstate)
 		  while(Usart2_Control_Data.tx_count!=0);
 		  Usart2_Control_Data.tx_count = 0;
 		  Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = *prdata++;
-		  if(MCUstate == 0){
+		  if(MCUstate != 1){
 				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = *prdata++;
 			}else{
 				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x80 + *prdata++;
@@ -254,8 +255,8 @@ static void response_pc_control(u8 usart,u8 *prdata,u16 reason,u8 MCUstate)
 				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x00;
 				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0xFF;
 			}else if(MCUstate ==2){//其他故障发生时，回复上位机
-				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =reason >>8;
-				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =reason;				
+				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =reason;
+				Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =reason>>8;				
 			}
 			crc=CRC_GetModbus16(Usart2_Control_Data.txbuf,Usart2_Control_Data.tx_count);
 			Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =crc;
@@ -356,6 +357,54 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 	 if(device_satate == 0){ //设备OK，解析并执行命令
 			switch(recdata.control.group_name){
 				case 0://其他控制
+					if(recdata.control.colum == 0x11){  //皮带控制
+						 if(recdata.control.command == 0x00){
+								Belt_Speed(0,0,0);
+								belt.state = RESERVE;
+							  Start_Ok = 0;
+							  belt.actual_state = BELT_STOP;
+						 }else if(recdata.control.command == 0x10){
+								if(recdata.control.medicine_num == 0x00){
+										BELT_DIR = 1;
+										belt.state = RESERVE;
+										Start_Ok = 0;
+										Belt_Speed(1,1,1);
+									  belt.actual_state = BELT_LRUN;
+								}else{
+										belt.actual_time = recdata.control.medicine_num * 200;
+										belt.state = READY;
+										Start_Ok = 0;
+									  belt.dir = 1;
+									  belt.actual_state = BELT_LRUN;
+								}
+						 }else if(recdata.control.command == 0x20){
+								if(recdata.control.medicine_num == 0x00){
+										BELT_DIR = 0;
+										belt.state = RESERVE;
+										Start_Ok = 0;
+										Belt_Speed(1,1,1);
+									  belt.actual_state = BELT_RRUN;
+								}else{
+										belt.actual_time = recdata.control.medicine_num * 200;
+										belt.state = READY;
+										Start_Ok = 0;
+									  belt.dir = 0;
+										belt.actual_state = BELT_RRUN;
+								}
+						 }
+					}else if(recdata.control.colum == 0x22){//闸门控制
+						if(recdata.control.command == 0x00){
+							lrgate.dir = GATELEFT;
+						}else{
+							lrgate.dir = GATELEFT;
+						}
+						if(recdata.control.medicine_num == 0x00){
+							lrgate.action = LGOPEN;
+						}else{
+							lrgate.action = LGCLOSE;
+						}
+						lrgate.state = READY;
+					}
 					break;
 				case 1:
 					group_send_medicine(1,recdata);
@@ -366,7 +415,38 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 				default:
 					break;
 			}
-			response_pc_control(SELECT_USART1,recdata.rec_buf,0x00,0x00);
+			response_pc_control(usart,recdata.rec_buf,0x00,0x00);
+	}else{//设备故障
+		response_pc_control(usart,recdata.rec_buf,reason,2);
+	}
+}
+static void host_read_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 reason,u8 device_satate)
+{
+	u8 temp,humi;
+	u8 device_s1,device_s2;
+	 if(device_satate == 0){ //设备OK，解析并执行命令
+			switch(recdata.control.colum){
+				case 0x0F:
+					device_s1 = ((belt.actual_state&0x0F)<<4) + (lrgate.Lactual_state&0x0F);
+				  device_s2 = ((lrgate.Ractual_state&0x0F)<<4) + 0x00;//电动滚动是否有错误报警暂时不检测
+				  reason = device_s2*256 + device_s1;
+				  device_satate = 2;
+					break;
+				case 0x1F:
+// 						response_pc_control(usart,recdata.rec_buf,reason,device_satate);
+				   temp = (u8)(param.temperatureC/10);
+				   humi = (u8)(param.humidityRH/10);
+				   reason = humi*256 + temp;
+				   device_satate = 2;
+					break;
+				case 0X63:
+				   reason = SOFTWARE_VERSIONS;
+				   device_satate = 2;
+					break;
+				default:
+					break;
+			}
+			response_pc_control(usart,recdata.rec_buf,reason,device_satate);
 	}else{//设备故障
 		response_pc_control(usart,recdata.rec_buf,reason,2);
 	}
@@ -390,11 +470,15 @@ static u8 Execute_Host_Comm(u8 usart)
 		}
 		crc=CRC_GetModbus16(Usart1_Control_Data.rxbuf,Usart1_Control_Data.rx_count-2);//帧结束尾不做校验
 		if((Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-2]+\
-				Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-1]*256 == crc)){	    
+				Usart1_Control_Data.rxbuf[Usart1_Control_Data.rx_count-1]*256 == crc)){	
 				for(i = 0;i < 9;i++){
 							MCU_Rec.rec_buf[i] = Usart1_Control_Data.rxbuf[i];
 				 }//把数据复制给主机通讯结构体
-				resolve_host_command(SELECT_USART1, MCU_Rec,0x00,0x00);
+				if(MCU_Rec.control.function == 0x06){
+						resolve_host_command(SELECT_USART1, MCU_Rec,0x00,0x00);
+				}else if(MCU_Rec.control.function == 0x03){
+						host_read_command(SELECT_USART1,MCU_Rec,0x00,0x00);
+				}
 				res = 0;
 		}else{
 				response_pc_control(SELECT_USART1,Usart1_Control_Data.rxbuf,0x00FF,1);
@@ -411,7 +495,11 @@ static u8 Execute_Host_Comm(u8 usart)
 				for(i = 0;i < 9;i++){
 							MCU_Rec.rec_buf[i] = Usart2_Control_Data.rxbuf[i];
 				 }//把数据复制给主机通讯结构体
-				resolve_host_command(SELECT_USART2, MCU_Rec,0x00,0x00);
+				if(MCU_Rec.control.function == 0x06){
+						resolve_host_command(SELECT_USART2, MCU_Rec,0x00,0x00);
+				}else if(MCU_Rec.control.function == 0x03){
+						host_read_command(SELECT_USART2,MCU_Rec,0x00,0x00);
+				}
 				res = 0;
 		}else{
 				response_pc_control(SELECT_USART2,Usart2_Control_Data.rxbuf,0x00FF,1);
@@ -447,11 +535,12 @@ void Group_Check_State(void)
 						}						
 					}
 				}
+// 								Group1.send_count--;
 			}
 			
 			if((Group2.send_count > 0)&&(Usart4_Control_Data.tx_count == 0)){
 				for(i=0;i<GROUP_LINE_MAX;i++){
-					for(j=0;j<20;j++){
+					for(j=0;j<GROUP_COLUM_MAX;j++){
 						if((Group2.group_send[i][j].send_buf[2] != 0xFF)&&(Group2.group_send[i][j].send_buf[2] == (i+1))\
 							&&(Group2.group_send[i][j].send_buf[3] == (j+1))){  //行地址不等于0XFF时代表发送药，需要检查状态
 								Usart4_Control_Data.tx_count = 0;
@@ -471,6 +560,7 @@ void Group_Check_State(void)
 						}
 					}
 				}
+// 				Group2.send_count--;
 			}
 		 Group_Check_Time = GROUP_CHECK_TIME;
 	}
@@ -596,7 +686,7 @@ void Communication_Process(void)
 			
     }
 	  if (1 == Usart4_Control_Data.rx_aframe){    
-				Execute_level_Comm(SELECT_USART1,SELECT_USART4);
+ 				Execute_level_Comm(SELECT_USART1,SELECT_USART4);
 				Usart4_Control_Data.rx_count = 0;
 				Auto_Frame_Time4 = AUTO_FRAME_TIMEOUT4;
 				Usart4_Control_Data.rx_aframe = 0;
