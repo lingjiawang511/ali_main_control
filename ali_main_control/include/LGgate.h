@@ -32,11 +32,11 @@
 
 #define      LEFT_GATE_OPEN  				do{A_LEFT_GATE_SET;B_LEFT_GATE_RESET;}while(0);	
 #define      LEFT_GATE_CLOSE  			do{B_LEFT_GATE_SET;A_LEFT_GATE_RESET;}while(0);
-#define      LEFT_GATE_RELEASE  		do{A_LEFT_GATE_RESET;B_LEFT_GATE_RESET;}while(0);	
+#define      LEFT_GATE_RELEASE  		do{A_LEFT_GATE_SET;B_LEFT_GATE_SET;}while(0);	
 
 #define      RIGHT_GATE_OPEN  			do{A_RIGHT_GATE_SET;B_RIGHT_GATE_RESET;}while(0);	
 #define      RIGHT_GATE_CLOSE  			do{B_RIGHT_GATE_SET;A_RIGHT_GATE_RESET;}while(0);	
-#define      RIGHT_GATE_RELEASE  		do{A_LEFT_GATE_RESET;B_LEFT_GATE_RESET;}while(0);
+#define      RIGHT_GATE_RELEASE  		do{A_RIGHT_GATE_SET;B_RIGHT_GATE_SET;}while(0);
 
 
 #define				LEFT_OPEN_IO					   	GPIO_Pin_6

@@ -2,7 +2,7 @@
 #define SHT1X_H
 
 #define SHT10_READ_TIME			1000   //5s钟读一次
-#define SHT10_USE_LOW_RESOLUTION    0
+#define SHT10_USE_LOW_RESOLUTION    1
 
 #define				SHT10_SCK_IO					GPIO_Pin_6 //和原理图调换一下
 #define				SHT10_SCK_PORT			  GPIOB

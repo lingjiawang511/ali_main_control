@@ -1,7 +1,8 @@
 #include "HeadType.h"	
 
 LRgate_Work_Type lrgate;
-
+u16 auto_close_Lgate_time;
+u16 auto_close_Rgate_time;
 
 void LRsensor_GPIO_Config(void)
 {
@@ -70,14 +71,27 @@ void LRsensor_GPIO_Config(void)
 	GPIO_Init(B_RIGHT_GATE_PORT, &GPIO_InitStructure);
 	
 	LRsensor_GPIO_Config();
+	LEFT_GATE_RELEASE;
+	RIGHT_GATE_RELEASE;
 	lrgate.state = RESERVE;
 }
 #define LGGATE_TIMEOUT	1000 
+#define ATUO_GATE_CLOSE_TIME	1000
 void LRgate_Control(void)
 {
 // 	static u16 delay_time = 0;
 	switch(lrgate.state){
-	case RESERVE:	lrgate.actual_time = 0;							
+	case RESERVE:	lrgate.actual_time = 0;	
+								if((auto_close_Lgate_time == 0)&&(lrgate.Lactual_state == GATEOPEN)){
+										lrgate.state = READY;
+										lrgate.dir = GATELEFT;
+										lrgate.action = LGCLOSE;
+								}
+								if((auto_close_Rgate_time == 0)&&(lrgate.Ractual_state == GATEOPEN)){
+										lrgate.state = READY;
+									  lrgate.dir = GATERIGHT;
+										lrgate.action = LGCLOSE;
+								}
 								break;
 	case READY:	
 								 if(lrgate.dir == GATELEFT){//此处需要通讯控制方向和时间
@@ -118,8 +132,15 @@ void LRgate_Control(void)
 								break;
 
 	case END:	
-								belt.state = RESERVE;
-
+					 if(lrgate.Lactual_state == GATEOPEN){
+							auto_close_Lgate_time = ATUO_GATE_CLOSE_TIME;
+						  lrgate.state = RESERVE;
+						}else if(lrgate.Ractual_state == GATEOPEN){
+							  auto_close_Rgate_time = ATUO_GATE_CLOSE_TIME;
+								lrgate.state = RESERVE;
+						}else{
+								lrgate.state = RESERVE;
+						}
 								break ;	
 	default :
 								break;	
@@ -156,6 +177,12 @@ void LRgate_sensor_irq(void )
 			  lrgate.Ractual_state = GATECLOSE;
 			  lrgate.state = END;
 		}
+	}	
+  if(auto_close_Lgate_time >0){
+		auto_close_Lgate_time--;
+	}
+  if(auto_close_Rgate_time >0){
+		auto_close_Rgate_time--;
 	}	
 }
 

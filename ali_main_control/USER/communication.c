@@ -321,6 +321,9 @@ static u8 group_send_medicine(u8 group,COMM_SlaveRec_Union_Type recdata)
 		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = 0x06;
 		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = recdata.control.line;
 		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = recdata.control.colum;
+// 		if(recdata.control.command == 0x11){
+// 			recdata.control.command = 0x0B;
+// 		}
 		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = recdata.control.command;	
 		Usart3_Control_Data.txbuf[Usart3_Control_Data.tx_count++] = recdata.control.medicine_num;	
     crc=CRC_GetModbus16(Usart3_Control_Data.txbuf,Usart3_Control_Data.tx_count);
@@ -339,6 +342,9 @@ static u8 group_send_medicine(u8 group,COMM_SlaveRec_Union_Type recdata)
 		Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = 0x06;
 		Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = recdata.control.line;
 		Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = recdata.control.colum;
+// 		if(recdata.control.command == 0x11){
+// 			recdata.control.command = 0x0B;
+// 		}
 		Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = recdata.control.command;	
 		Usart4_Control_Data.txbuf[Usart4_Control_Data.tx_count++] = recdata.control.medicine_num;	
     crc=CRC_GetModbus16(Usart4_Control_Data.txbuf,Usart4_Control_Data.tx_count);
@@ -400,9 +406,9 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 							lrgate.dir = GATELEFT;
 						}
 						if(recdata.control.medicine_num == 0x00){
-							lrgate.action = LGOPEN;
-						}else{
 							lrgate.action = LGCLOSE;
+						}else{
+							lrgate.action = LGOPEN;
 						}
 						lrgate.state = READY;
 					}

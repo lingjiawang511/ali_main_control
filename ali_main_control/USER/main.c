@@ -43,13 +43,18 @@ int main(void)
     TIM2_Config();
     TIM3_Config();
 // 		param_init();
-		delay_ms(1000);
+		delay_ms(100);
+// 	  lrgate.state = READY;
+// 	
+// 	  lrgate.dir =GATERIGHT;
+// 		lrgate.action =LGOPEN;
+// // 	  lrgate.action =LGCLOSE;
+	
     while(1){
 			Communication_Process();
 			LRgate_Control();
-			read_TEMP_RH();
-		}
-        
+			read_TEMP_RH();	
+		}      
 }
 
 // void param_init(void)
