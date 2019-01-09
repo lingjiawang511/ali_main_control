@@ -35,7 +35,7 @@ int main(void)
 		LED_GPIO_Config();
 		LRgate_GPIO_Config();
 	  sensor_init_sht1x();
-		EXTIX_Init();
+// 		EXTIX_Init();
     USART1_Config();
 		USART2_Config();
 		USART3_Config();
@@ -48,11 +48,11 @@ int main(void)
 // 	
 // 	  lrgate.dir =GATERIGHT;
 // 		lrgate.action =LGOPEN;
-// // 	  lrgate.action =LGCLOSE;
+// 	  lrgate.action =LGCLOSE;
 	
     while(1){
 			Communication_Process();
-			LRgate_Control();
+// 			LRgate_Control();
 			read_TEMP_RH();	
 		}      
 }
