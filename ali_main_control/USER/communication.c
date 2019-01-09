@@ -439,7 +439,7 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 }
 static void host_read_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 reason,u8 device_satate)
 {
-	u8 temp,humi;
+	u8 tempH,tempL,humiH,humiL;
 	u8 device_s1,device_s2;
 	 if(device_satate == 0){ //设备OK，解析并执行命令
 			switch(recdata.control.colum){
@@ -450,12 +450,25 @@ static void host_read_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 reas
 				  device_satate = 2;
 					break;
 				case 0x1F:
-// 						response_pc_control(usart,recdata.rec_buf,reason,device_satate);
-				   temp = (u8)(param.temperatureC/10);
-				   humi = (u8)(param.humidityRH/10);
-				   reason = humi*256 + temp;
-				   device_satate = 2;
+				   if(param.temperatureC < 0){
+							tempH = ((-1*param.temperatureC)/256)|0x80;
+						  tempL = (-1*param.temperatureC)%256;
+						}else{
+							tempH = param.temperatureC/256;
+							tempL = param.temperatureC%256;
+						}
+// 				   tempH = (u8)(param.temperatureC/10);
+// 				   humi = (u8)(param.humidityRH/10);
+// 				   reason = humi*256 + temp;
+							reason = tempL*256 + tempH;
+							device_satate = 2;
 					break;
+				case 0x2F:
+							humiH = param.humidityRH/256;
+							humiL = param.humidityRH%256;
+							reason = humiL*256 + humiH;
+							device_satate = 2;
+					break;				
 				case 0X63:
 				   reason = SOFTWARE_VERSIONS;
 				   device_satate = 2;
