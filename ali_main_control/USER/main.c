@@ -26,6 +26,7 @@ void read_TEMP_RH(void)
 		}
 	}
 }
+
 //配置时钟在target宏定义
 int main(void)
 {
@@ -42,51 +43,18 @@ int main(void)
 		USART4_Config();
     TIM2_Config();
     TIM3_Config();
-// 		param_init();
-		delay_ms(100);
-// 	  lrgate.state = READY;
-// 	
-// 	  lrgate.dir =GATERIGHT;
-// 		lrgate.action =LGOPEN;
-// 	  lrgate.action =LGCLOSE;
-	
+		param_init();
+		delay_ms(100);	
     while(1){
 			Communication_Process();
-// 			LRgate_Control();
+			LRgate_Control();
 			read_TEMP_RH();	
 		}      
 }
 
-// void param_init(void)
-// {
-
-// 	Air_Control.process = RESERVE;
-// 	Air_Control.complete = 1;
-// 	Air_Control.air_cylinder_position =IN_UP;
-
-// 	Printer.complete = 0;
-// 	Printer.process = PRINTER_RESERVE;
-// 	PRINTER_START_OFF;
-//   PRINTER_RESTART_OFF;
-// 	
-// 	Control.upper_reach.state = 0;
-// 	Control.scanner.state = 0;
-// 	Control.fit_reach.state = 0;
-// 	Control.fluid_bag.state = 0;
-// 	Printer.color_end.state = 0;
-// 	Printer.color_less.state = 0;
-// 	Printer.end.state = 0;
-// 	Printer.err.state = 0;
-// 	Printer.pinline.state = 0;
-// 	Printer.tag_end.state = 0;
-// 	Printer.input_state = 0;
-// 	MCU_Host_Send.control.err_message = 0;
-// 	Baffle_Control.process_time = Baffle_Control.PC_send_process_time;
-//   MCU_Host_Send.control.recom_state = 0;
-// 	Baffle_Control.PC_send_scanner_result = 0;
-// 	Ba ffle_Control.scanner_result_old = 0;
-// 	Update_Baffle_State(1);
-// 	baffle_err_timeout = BAFFLE_ERR_TIMEOUT;
-// }
+void param_init(void)
+{
+	Init_Group_Param();
+}
 
 

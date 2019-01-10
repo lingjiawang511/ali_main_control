@@ -3,7 +3,8 @@
 LRgate_Work_Type lrgate;
 u16 auto_close_Lgate_time;
 u16 auto_close_Rgate_time;
-
+u8 send_getout_to_pc = 0;
+u8 shipment_send_state = 0;
 void LRsensor_GPIO_Config(void)
 {
 	//定义一个GPIO_InitTypeDef 类型的结构体，名字叫GPIO_InitStructure 
@@ -32,6 +33,31 @@ void LRsensor_GPIO_Config(void)
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; 		 
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
 	GPIO_Init(RIGHT_CLOSE_PORT, &GPIO_InitStructure);
+	
+}
+void LRgetout_GPIO_Config(void)
+{
+	//定义一个GPIO_InitTypeDef 类型的结构体，名字叫GPIO_InitStructure 
+	GPIO_InitTypeDef  GPIO_InitStructure;
+
+	RCC_APB2PeriphClockCmd(LEFT_SHIPMENT_RCC,ENABLE);
+	GPIO_InitStructure.GPIO_Pin = LEFT_SHIPMENT_IO;		  
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; 		 
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(LEFT_SHIPMENT_PORT, &GPIO_InitStructure);
+
+	RCC_APB2PeriphClockCmd(RIGHT_SHIPMENT_RCC,ENABLE);
+	GPIO_InitStructure.GPIO_Pin = RIGHT_SHIPMENT_IO;		  
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; 		 
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(RIGHT_SHIPMENT_PORT, &GPIO_InitStructure);
+	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_AFIO|GETOUT_MEDICINE_RCC,ENABLE);
+	GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable,ENABLE);
+	GPIO_InitStructure.GPIO_Pin = GETOUT_MEDICINE_IO;		  
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD; 		 
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;
+	GPIO_Init(GETOUT_MEDICINE_PORT, &GPIO_InitStructure);	
 	
 }
 //=============================================================================
@@ -71,6 +97,7 @@ void LRsensor_GPIO_Config(void)
 	GPIO_Init(B_RIGHT_GATE_PORT, &GPIO_InitStructure);
 	
 	LRsensor_GPIO_Config();
+	LRgetout_GPIO_Config();
 	LEFT_GATE_RELEASE;
 	RIGHT_GATE_RELEASE;
 	lrgate.state = RESERVE;
@@ -149,9 +176,16 @@ void LRgate_Control(void)
 
 void LRgate_sensor_irq(void )
 {
+	static u8 getout_filter = 0;
+	static u8 getout_resetfilter = 0;
+	static u8 getout_state = 0;
+	static u8 Lshiment_filter = 0;
+	static u8 Rshiment_filter = 0;
+	static u8 Lshimen_state = 0;
+	static u8 Rshimen_state = 0;
 	if(lrgate.Lactual_state == GATEOPENNING){
 		 if(READ_LOPEN_SENSOR == READHIGH){
-				LEFT_GATE_RELEASE;
+			 LEFT_GATE_RELEASE;
 			 lrgate.Lactual_state = GATEOPEN;
 			 lrgate.state = END;
 		}
@@ -169,6 +203,7 @@ void LRgate_sensor_irq(void )
 				RIGHT_GATE_RELEASE;
 			  lrgate.Ractual_state = GATEOPEN;
 			  lrgate.state = END;
+			  Lshimen_state =  0;
 		}
 	}
 	if(lrgate.Ractual_state == GATECLOSING){
@@ -176,14 +211,58 @@ void LRgate_sensor_irq(void )
 				RIGHT_GATE_RELEASE;
 			  lrgate.Ractual_state = GATECLOSE;
 			  lrgate.state = END;
+			  Rshimen_state =  0;
 		}
 	}	
+	if(READ_LEFT_SHIPMENT_SENSOR == READHIGH){
+		if((lrgate.Lactual_state == (u8)GATEOPEN)||(lrgate.Lactual_state == (u8)GATEOPENNING)){
+			Lshiment_filter++;
+			if((Lshiment_filter >3)&&(Lshimen_state == 0)){
+				shipment_send_state = 1;
+				Lshiment_filter = 0;
+				Lshimen_state = 1;
+			}
+		}
+	}
+	if(READ_RIGHT_SHIPMENT_SENSOR == READHIGH){
+		if((lrgate.Ractual_state == (u8)GATEOPEN)||(lrgate.Ractual_state == (u8)GATEOPENNING)){
+			Rshiment_filter++;
+			if((Rshiment_filter >3)&&(Rshimen_state == 0)){
+				shipment_send_state = 2;
+				Rshiment_filter = 0;
+				Rshimen_state = 1;
+			}
+		}
+	}
   if(auto_close_Lgate_time >0){
 		auto_close_Lgate_time--;
 	}
   if(auto_close_Rgate_time >0){
 		auto_close_Rgate_time--;
 	}	
+	
+	if(READ_GETOUT_MEDICINE_SENSOR == READLOW){
+		if(getout_state == 0){
+			getout_filter++;
+		  if(getout_filter > 20){
+				if(READ_GETOUT_MEDICINE_SENSOR == READLOW){
+					send_getout_to_pc = 1;
+					getout_state = 1;
+				}
+				getout_filter = 0;
+			}
+		}
+	}else{
+		if(getout_state == 1){
+			getout_resetfilter++;
+			if(getout_resetfilter > 20){
+				if(READ_GETOUT_MEDICINE_SENSOR == READHIGH){
+					getout_state = 0;
+				}
+				getout_resetfilter = 0;
+			}
+		}
+	}
 }
 
 

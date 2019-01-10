@@ -61,6 +61,7 @@ typedef uint32	ulong;		/**< 32-bit value */
 #define GROUP_LINE_MAX					20
 #define GROUP_COLUM_MAX					16
 #define SOFTWARE_VERSIONS			  0X5001  //通讯小端模式，版本号大端模式，所以0x5001 = V01.50
+#define SHT10_READ_TIME			4000   //20s钟读一次
 /*************define type end*******************/
 
 /*************union type start*******************/
@@ -403,6 +404,7 @@ extern u32 uiRoll_Paper_ON_Delay;
 extern u16 baffle_err_timeout;
 extern u16 Group_Check_Time ;
 extern unsigned int sht10_read_time;
+extern u8 shipment_send_state;
 /*************extern variable end*******************/
 
 /*************function start*******************/

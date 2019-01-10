@@ -13,6 +13,7 @@ COMM_SlaveSend_Union_Type 	MCU_Send;
 Group_COMM_Type Group1,Group2;
 u16 Group_Check_Time = 40;  //200ms
 static u8 pc_use_usart = 1;
+extern u8 send_getout_to_pc;
 //=============================================================================
 //函数名称:SLAVE_Rec_Comm
 //功能概要:PC作为通讯主机时接收的控制字处理并响应
@@ -207,6 +208,24 @@ static u8  SLAVE_Rec_Comm(void)
 
 
 //}
+void Init_Group_Param(void)
+{
+	u8 i,j;
+	Group1.send_count = 0;
+	for(i=0;i<GROUP_LINE_MAX;i++){
+		for(j=0;j<GROUP_COLUM_MAX;j++){
+			Group1.group_send[i][j].send_buf[2] = 0xFF;
+			Group1.group_send[i][j].send_buf[3] = 0xFF;	
+		}
+	}
+	Group2.send_count = 0;
+	for(i=0;i<GROUP_LINE_MAX;i++){
+		for(j=0;j<GROUP_COLUM_MAX;j++){
+			Group2.group_send[i][j].send_buf[2] = 0xFF;
+			Group2.group_send[i][j].send_buf[3] = 0xFF;	
+		}
+	}
+}
 static void response_pc_control(u8 usart,u8 *prdata,u16 reason,u8 MCUstate)
 {
 	 u16 crc;
@@ -401,7 +420,7 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 						 }
 					}else if(recdata.control.colum == 0x22){//闸门控制
 						if(recdata.control.command == 0x00){
-							lrgate.dir = GATELEFT;
+							lrgate.dir = GATERIGHT;
 						}else{
 							lrgate.dir = GATELEFT;
 						}
@@ -411,6 +430,8 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 							lrgate.action = LGOPEN;
 						}
 						lrgate.state = READY;
+					}else if(recdata.control.colum == 0x33){//通讯超时复位
+							Init_Group_Param();
 					}
 					break;
 				case 1:
@@ -685,6 +706,86 @@ u8 Execute_level_Comm(u8 PCusart,u8 GRusart)
 	}
 	return res;
 }
+void Send_getout_to_pc(u8 usart)
+{
+	 u16 crc;
+		if(send_getout_to_pc == 1){
+			if(usart == SELECT_USART1){
+					while(Usart1_Control_Data.tx_count!=0);
+					Usart1_Control_Data.tx_count = 0;
+					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x06;
+					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x06;
+					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
+					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
+					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x51;
+					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
+					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x01;
+					crc=CRC_GetModbus16(Usart1_Control_Data.txbuf,Usart1_Control_Data.tx_count);
+					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =crc;
+					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =crc>>8;
+					Usart1_Control_Data.tx_index = 0;
+					USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
+			}else if(usart == SELECT_USART2){
+					while(Usart2_Control_Data.tx_count!=0);
+					Usart2_Control_Data.tx_count = 0;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = 0x06;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x06;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x00;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x00;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x51;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x00;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x01;
+					crc=CRC_GetModbus16(Usart2_Control_Data.txbuf,Usart2_Control_Data.tx_count);
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =crc;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =crc>>8;
+					Usart2_Control_Data.tx_index = 0;
+					USART_SendData(USART2,Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_index++]);
+			}			
+			send_getout_to_pc = 0;
+		}		
+		if(shipment_send_state > 0 ){
+// 			if(usart == SELECT_USART1){
+// 					while(Usart1_Control_Data.tx_count!=0);
+// 					Usart1_Control_Data.tx_count = 0;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x06;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x06;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x61;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
+// 					if(shipment_send_state == 1){
+// 						Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
+// 					}else{
+// 						Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x01;
+// 					}
+// 					crc=CRC_GetModbus16(Usart1_Control_Data.txbuf,Usart1_Control_Data.tx_count);
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =crc;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =crc>>8;
+// 					Usart1_Control_Data.tx_index = 0;
+// 					USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
+// 			}else if(usart == SELECT_USART2){
+					while(Usart2_Control_Data.tx_count!=0);
+					Usart2_Control_Data.tx_count = 0;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = 0x06;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x06;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x00;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x00;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x61;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x00;
+					if(shipment_send_state == 1){
+						Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x00;
+					}else{
+						Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x01;
+					}
+					crc=CRC_GetModbus16(Usart2_Control_Data.txbuf,Usart2_Control_Data.tx_count);
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =crc;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =crc>>8;
+					Usart2_Control_Data.tx_index = 0;
+					USART_SendData(USART2,Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_index++]);
+// 			}			
+			shipment_send_state = 0;
+		}			
+}
 //=============================================================================
 //函数名称:Respond_Host_Comm
 //功能概要:响应上位机的发出的数据命令，数据已经从串口一接收完整
@@ -721,6 +822,7 @@ void Communication_Process(void)
 				Auto_Frame_Time4 = AUTO_FRAME_TIMEOUT4;
 				Usart4_Control_Data.rx_aframe = 0;
     }
+		Send_getout_to_pc(pc_use_usart);
 		Group_Check_State();
 }
 

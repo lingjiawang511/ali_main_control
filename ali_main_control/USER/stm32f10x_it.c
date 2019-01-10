@@ -151,7 +151,7 @@ void TIM2_IRQHandler(void)
 		Led_Flash();
 		Belt_Control();
 		Key_Light_Dispose();
-// 		LRgate_sensor_irq();
+		LRgate_sensor_irq();
     if(Group_Check_Time > 0){
       Group_Check_Time--;
     }
@@ -234,6 +234,7 @@ void USART1_IRQHandler(void)
   
 	if(USART_GetFlagStatus(USART1, USART_FLAG_RXNE)||USART_GetFlagStatus(USART1, USART_FLAG_ORE) != RESET){ //解决数据没接收完一直进中断的问题
        USART1_Do_Rx(USART_ReceiveData(USART1));
+		   sht10_read_time = SHT10_READ_TIME;
        USART_ClearFlag(USART1,USART_FLAG_RXNE);
 	}
 	if(USART_GetFlagStatus(USART1, USART_FLAG_TC)){
@@ -252,6 +253,7 @@ void USART2_IRQHandler(void)
   
 	if(USART_GetFlagStatus(USART2, USART_FLAG_RXNE)||USART_GetFlagStatus(USART2, USART_FLAG_ORE) != RESET){ //解决数据没接收完一直进中断的问题
        USART2_Do_Rx(USART_ReceiveData(USART2));
+		   sht10_read_time = SHT10_READ_TIME;
        USART_ClearFlag(USART2,USART_FLAG_RXNE);
 	}
 	if(USART_GetFlagStatus(USART2, USART_FLAG_TC)){

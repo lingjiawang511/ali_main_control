@@ -26,7 +26,7 @@
 //#define       COMMUNICATION_IO3_ON  				GPIO_ResetBits(COMMUNICATION_IO3_PORT, COMMUNICATION_IO3_IO)
 
 
-
+void Init_Group_Param(void);
 void Communication_GPIO_Config(void);
 void Communication_Process(void);
 void Dispose_Data_For_Host(void);
