@@ -435,6 +435,7 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 					}
 					break;
 				case 1:
+					Group_Check_Time = GROUP_CHECK_TIME;
 					group_send_medicine(1,recdata);
 				  if(usart == SELECT_USART1){
 						pc_use_usart = SELECT_USART1;
@@ -443,6 +444,7 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 					}
 					break;
 				case 2:
+					Group_Check_Time = GROUP_CHECK_TIME;
 					group_send_medicine(2,recdata);
 					if(usart == SELECT_USART1){
 						pc_use_usart = SELECT_USART1;
@@ -710,22 +712,22 @@ void Send_getout_to_pc(u8 usart)
 {
 	 u16 crc;
 		if(send_getout_to_pc == 1){
-			if(usart == SELECT_USART1){
-					while(Usart1_Control_Data.tx_count!=0);
-					Usart1_Control_Data.tx_count = 0;
-					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x06;
-					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x06;
-					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
-					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
-					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x51;
-					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
-					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x01;
-					crc=CRC_GetModbus16(Usart1_Control_Data.txbuf,Usart1_Control_Data.tx_count);
-					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =crc;
-					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =crc>>8;
-					Usart1_Control_Data.tx_index = 0;
-					USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
-			}else if(usart == SELECT_USART2){
+// 			if(usart == SELECT_USART1){
+// 					while(Usart1_Control_Data.tx_count!=0);
+// 					Usart1_Control_Data.tx_count = 0;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x06;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x06;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x51;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x01;
+// 					crc=CRC_GetModbus16(Usart1_Control_Data.txbuf,Usart1_Control_Data.tx_count);
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =crc;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =crc>>8;
+// 					Usart1_Control_Data.tx_index = 0;
+// 					USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
+// 			}else if(usart == SELECT_USART2){
 					while(Usart2_Control_Data.tx_count!=0);
 					Usart2_Control_Data.tx_count = 0;
 					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = 0x06;
@@ -740,7 +742,7 @@ void Send_getout_to_pc(u8 usart)
 					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =crc>>8;
 					Usart2_Control_Data.tx_index = 0;
 					USART_SendData(USART2,Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_index++]);
-			}			
+// 			}			
 			send_getout_to_pc = 0;
 		}		
 		if(shipment_send_state > 0 ){

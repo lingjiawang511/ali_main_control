@@ -7,6 +7,8 @@ Belt_Work_Type belt;
 Printer_Type Printer;
 Control_Input_Type Control;
 tag_param param = {0};
+void IWDG_Init(u8 prer,u16 rlr);
+void IWDG_Feed(void);
 unsigned int sht10_read_time;
 void delay_ms1(u16 ms)
 {
@@ -44,8 +46,10 @@ int main(void)
     TIM2_Config();
     TIM3_Config();
 		param_init();
+// 		IWDG_Init(128,625);    //与分频数为128,重载值为625,溢出时间为2s	
 		delay_ms(100);	
     while(1){
+// 			IWDG_Feed();
 			Communication_Process();
 			LRgate_Control();
 			read_TEMP_RH();	
@@ -55,6 +59,24 @@ int main(void)
 void param_init(void)
 {
 	Init_Group_Param();
+}
+
+void IWDG_Init(u8 prer,u16 rlr) 
+{	
+ 	IWDG_WriteAccessCmd(IWDG_WriteAccess_Enable);  //使能对寄存器IWDG_PR和IWDG_RLR的写操作
+	
+	IWDG_SetPrescaler(prer);  //设置IWDG预分频值:设置IWDG预分频值为64
+	
+	IWDG_SetReload(rlr);  //设置IWDG重装载值
+	
+	IWDG_ReloadCounter();  //按照IWDG重装载寄存器的值重装载IWDG计数器
+	
+	IWDG_Enable();  //使能IWDG
+}
+//喂独立看门狗
+void IWDG_Feed(void)
+{   
+ 	IWDG_ReloadCounter();//reload										   
 }
 
 
