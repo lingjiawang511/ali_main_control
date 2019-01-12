@@ -6,6 +6,8 @@ u16 auto_close_Rgate_time;
 u8 send_getout_to_pc = 0;
 u8 Lshipment_send_state = 0;
 u8 Rshipment_send_state = 0;
+u8 Lshipment_send_errstate = 0;
+u8 Rshipment_send_errstate = 0;
 void LRsensor_GPIO_Config(void)
 {
 	//定义一个GPIO_InitTypeDef 类型的结构体，名字叫GPIO_InitStructure 
@@ -233,12 +235,17 @@ void LRgate_sensor_irq(void )
 	static u8 Rshiment_filter = 0;
 	static u8 Lshimen_state = 0;
 	static u8 Rshimen_state = 0;
+	static u8 Lshiment_errfilter = 0;
+	static u8 Rshiment_errfilter = 0;	
+	static u8 Lshimen_errstate = 0;
+	static u8 Rshimen_errstate = 0;
 	if(Lgate.Lactual_state == GATEOPENNING){
 		 if(READ_LOPEN_SENSOR == READHIGH){
 			 LEFT_GATE_RELEASE;
 			 Lgate.Lactual_state = GATEOPEN;
 			 Lgate.state = END;
 		}
+		Lshimen_errstate = 0;
 	}
 	if(Lgate.Lactual_state == GATECLOSING){
 		 if(READ_LCLOSE_SENSOR == READHIGH){
@@ -255,6 +262,7 @@ void LRgate_sensor_irq(void )
 			  Rgate.Ractual_state = GATEOPEN;
 			  Rgate.state = END;
 		}
+		Rshimen_errstate = 0;
 	}
 	if(Rgate.Ractual_state == GATECLOSING){
 		 if(READ_RCLOSE_SENSOR == READHIGH){
@@ -272,8 +280,14 @@ void LRgate_sensor_irq(void )
 				Lshiment_filter = 0;
 				Lshimen_state = 1;
 			}
-		}else if(Lgate.Lactual_state == (u8)GATEOPENNING){ //关门的时候有药需要处理
-
+		}else if(Lgate.Lactual_state == (u8)GATECLOSING){ //关门的时候有药需要处理
+				Lshiment_errfilter++;
+				if((Lshiment_errfilter >=2)&&(Lshimen_errstate == 0)){
+					Lshipment_send_errstate = 1;
+					Lshiment_filter = 0;
+					Lshimen_errstate = 1;
+					LEFT_GATE_RELEASE;
+				}
 		}
 	}else{
 		Lshiment_filter = 0;
@@ -286,8 +300,14 @@ void LRgate_sensor_irq(void )
 				Rshiment_filter = 0;
 				Rshimen_state = 1;
 			}
-		}else if(Rgate.Ractual_state == (u8)GATEOPENNING){
-			
+		}else if(Rgate.Ractual_state == (u8)GATECLOSING){
+				Rshiment_errfilter++;
+				if((Rshiment_errfilter >=2)&&(Rshimen_errstate == 0)){
+					Rshipment_send_errstate = 1;
+					Rshiment_filter = 0;
+					Rshimen_errstate = 1;
+					RIGHT_GATE_RELEASE;					
+				}			
 		}
 	}else{
 		Rshiment_filter = 0;

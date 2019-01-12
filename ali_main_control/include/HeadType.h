@@ -408,6 +408,8 @@ extern u16 Group2_Check_Time ;
 extern unsigned int sht10_read_time;
 extern u8 Lshipment_send_state;
 extern u8 Rshipment_send_state;
+extern u8 Lshipment_send_errstate;
+extern u8 Rshipment_send_errstate;
 extern u8 Speed_Step;
 /*************extern variable end*******************/
 

@@ -893,10 +893,10 @@ void Send_getout_to_pc(u8 usart)
 					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x61;
 					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x00;
 					if(Lshipment_send_state == 1){
-						Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x00;
+						Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x01;
 						Lshipment_send_state = 0;
 					}else{
-						Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x01;
+						Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x00;
 						Rshipment_send_state = 0;
 					}
 					crc=CRC_GetModbus16(Usart2_Control_Data.txbuf,Usart2_Control_Data.tx_count);
@@ -905,7 +905,52 @@ void Send_getout_to_pc(u8 usart)
 					Usart2_Control_Data.tx_index = 0;
 					USART_SendData(USART2,Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_index++]);
 // 			}			
-		}			
+		}	
+		if((Lshipment_send_errstate ==1)||(Rshipment_send_errstate ==1) ){
+// 			if(usart == SELECT_USART1){
+// 					while(Usart1_Control_Data.tx_count!=0);
+// 					Usart1_Control_Data.tx_count = 0;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] = 0x06;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x06;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x61;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
+// 					if(Lshipment_send_errstate == 1){
+// 						Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x00;
+// 						Lshipment_send_errstate = 0;
+// 					}else{
+// 						Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =0x01;
+// 						Rshipment_send_errstate = 0;
+// 					}
+// 					crc=CRC_GetModbus16(Usart1_Control_Data.txbuf,Usart1_Control_Data.tx_count);
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =crc;
+// 					Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_count++] =crc>>8;
+// 					Usart1_Control_Data.tx_index = 0;
+// 					USART_SendData(USART1,Usart1_Control_Data.txbuf[Usart1_Control_Data.tx_index++]);
+// 			}else if(usart == SELECT_USART2){
+					while(Usart2_Control_Data.tx_count!=0);
+					Usart2_Control_Data.tx_count = 0;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] = 0x06;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x06;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x00;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x00;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x71;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x00;
+					if(Lshipment_send_errstate == 1){
+						Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x01;
+						Lshipment_send_errstate = 0;
+					}else{
+						Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =0x00;
+						Rshipment_send_errstate = 0;
+					}
+					crc=CRC_GetModbus16(Usart2_Control_Data.txbuf,Usart2_Control_Data.tx_count);
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =crc;
+					Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_count++] =crc>>8;
+					Usart2_Control_Data.tx_index = 0;
+					USART_SendData(USART2,Usart2_Control_Data.txbuf[Usart2_Control_Data.tx_index++]);
+// 			}			
+		}		
 }
 //=============================================================================
 //º¯ÊýÃû³Æ:Respond_Host_Comm
