@@ -152,14 +152,20 @@ void TIM2_IRQHandler(void)
 		Belt_Control();
 		Key_Light_Dispose();
 		LRgate_sensor_irq();
-    if(Group_Check_Time > 0){
-      Group_Check_Time--;
+    if(Group1_Check_Time > 0){
+      Group1_Check_Time--;
     }
+    if(Group2_Check_Time > 0){
+      Group2_Check_Time--;
+    }		
 		if(sht10_read_time > 0){
 			sht10_read_time--;
 		}	
-		if(lrgate.actual_time > 0){
-			lrgate.actual_time--;
+		if(Lgate.actual_time > 0){
+			Lgate.actual_time--;
+		}
+		if(Rgate.actual_time > 0){
+			Rgate.actual_time--;
 		}
 		TIM_ClearITPendingBit(TIM2 , TIM_FLAG_Update);  		 
 	}		 	

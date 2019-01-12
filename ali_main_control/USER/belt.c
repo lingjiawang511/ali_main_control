@@ -1,6 +1,6 @@
 #include "HeadType.h"	
 
-static u8 Speed_Step;
+u8 Speed_Step;
 u8 Start_Ok;
 u8 Send_Medicine_Finish_State;		//所有通道发药完成状态，避免发药没完成，皮带就停止了
 //=============================================================================
@@ -41,7 +41,8 @@ u8 Send_Medicine_Finish_State;		//所有通道发药完成状态，避免发药没完成，皮带就停
 	Start_Ok = 0;
 	BELT_SPEED1 = 0;
 	BELT_DIR = 0;
-	Send_Medicine_Finish_State = 0;
+	belt.state = RESERVE;
+	belt.actual_state = BELT_STOP;
 }
 
 //=============================================================================
@@ -147,7 +148,7 @@ void Belt_Control(void)
 	switch(belt.state){
 	case RESERVE:
 // 								belt.actual_time = 1000;	
-								belt.actual_state = BELT_STOP;
+								
 								break;
 	case READY:	if(Start_Ok == 0){
 		            if(belt.dir == 1){
@@ -173,6 +174,7 @@ void Belt_Control(void)
 	case END:	if(Start_Ok == 1){
 								Speed_Step = Stop_Belt(Speed_Step);
 						}else{
+							  belt.actual_state = BELT_STOP;
 								belt.state = RESERVE;
 						}
 								break ;	

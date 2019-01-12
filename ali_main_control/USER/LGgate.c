@@ -1,10 +1,11 @@
 #include "HeadType.h"	
 
-LRgate_Work_Type lrgate;
+LRgate_Work_Type Lgate,Rgate;
 u16 auto_close_Lgate_time;
 u16 auto_close_Rgate_time;
 u8 send_getout_to_pc = 0;
-u8 shipment_send_state = 0;
+u8 Lshipment_send_state = 0;
+u8 Rshipment_send_state = 0;
 void LRsensor_GPIO_Config(void)
 {
 	//定义一个GPIO_InitTypeDef 类型的结构体，名字叫GPIO_InitStructure 
@@ -100,78 +101,127 @@ void LRgetout_GPIO_Config(void)
 	LRgetout_GPIO_Config();
 	LEFT_GATE_RELEASE;
 	RIGHT_GATE_RELEASE;
-	lrgate.state = RESERVE;
+	Lgate.state = RESERVE;
+	Rgate.state = RESERVE;
+	auto_close_Rgate_time = 400;
+	auto_close_Lgate_time = 400;
+	Rgate.send_time = 2;
+	Lgate.send_time = 2;
+	Lgate.dir = GATELEFT;
+	Lgate.action = LGOPEN;
+	Lgate.state = READY;
+	Rgate.dir = GATERIGHT;
+	Rgate.action = LGOPEN;
+	Rgate.state = READY;
 }
 #define LGGATE_TIMEOUT	1000 
 #define ATUO_GATE_CLOSE_TIME	1000
-void LRgate_Control(void)
+
+void Lgate_Control(void)
 {
 // 	static u16 delay_time = 0;
-	switch(lrgate.state){
-	case RESERVE:	lrgate.actual_time = 0;	
-								if((auto_close_Lgate_time == 0)&&(lrgate.Lactual_state == GATEOPEN)){
-										lrgate.state = READY;
-										lrgate.dir = GATELEFT;
-										lrgate.action = LGCLOSE;
+	switch(Lgate.state){
+	case RESERVE:	Lgate.actual_time = 0;	
+								if((auto_close_Lgate_time == 0)&&(Lgate.Lactual_state == GATEOPEN)){
+										Lgate.state = READY;
+										Lgate.dir = GATELEFT;
+										Lgate.action = LGCLOSE;
 								}
-								if((auto_close_Rgate_time == 0)&&(lrgate.Ractual_state == GATEOPEN)){
-										lrgate.state = READY;
-									  lrgate.dir = GATERIGHT;
-										lrgate.action = LGCLOSE;
+								if((auto_close_Rgate_time == 0)&&(Lgate.Ractual_state == GATEOPEN)){
+										Lgate.state = READY;
+									  Lgate.dir = GATERIGHT;
+										Lgate.action = LGCLOSE;
 								}
 								break;
 	case READY:	
-								 if(lrgate.dir == GATELEFT){//此处需要通讯控制方向和时间
-										if(lrgate.action == LGOPEN){
+								 if(Lgate.dir == GATELEFT){//此处需要通讯控制方向和时间
+										if(Lgate.action == LGOPEN){
 												LEFT_GATE_OPEN;
-											  lrgate.Lactual_state = GATEOPENNING;
-										}else if(lrgate.action == LGCLOSE){
+											  Lgate.Lactual_state = GATEOPENNING;
+										}else if(Lgate.action == LGCLOSE){
 												LEFT_GATE_CLOSE;
-											  lrgate.Lactual_state = GATECLOSING;
+											  Lgate.Lactual_state = GATECLOSING;
 										}
 									}else{
-										if(lrgate.action == LGOPEN){
-												RIGHT_GATE_OPEN;
-												lrgate.Ractual_state = GATEOPENNING;
-										}else if(lrgate.action == LGCLOSE){
-												RIGHT_GATE_CLOSE;
-												lrgate.Ractual_state = GATECLOSING;
-										}
 									}
-									lrgate.actual_time = LGGATE_TIMEOUT;
-									lrgate.state = WORKING;
+									Lgate.actual_time = LGGATE_TIMEOUT;
+									Lgate.state = WORKING;
 								break ;	
 	case WORKING://此处用定时器做超时处理，如果NS之后开关没有完成，则开关闸门出现故障
-								if(lrgate.actual_time == 0){
-										if(lrgate.Lactual_state == GATEOPENNING){
-												lrgate.state = END;
+								if(Lgate.actual_time == 0){
+										if(Lgate.Lactual_state == GATEOPENNING){
+												Lgate.state = END;
 											  LEFT_GATE_RELEASE;
-												lrgate.Lactual_state = GATEERR;											
+												Lgate.Lactual_state = GATEERR;											
 										}
 								}
-								if(lrgate.actual_time == 0){
-										if(lrgate.Ractual_state == GATEOPENNING){
-												lrgate.state = END;
-											  RIGHT_GATE_RELEASE;
-												lrgate.Ractual_state = GATEERR;											
-										}
-								}	
 								break;
 
 	case END:	
-					 if(lrgate.Lactual_state == GATEOPEN){
-							auto_close_Lgate_time = ATUO_GATE_CLOSE_TIME;
-						  lrgate.state = RESERVE;
-						}else if(lrgate.Ractual_state == GATEOPEN){
-							  auto_close_Rgate_time = ATUO_GATE_CLOSE_TIME;
-								lrgate.state = RESERVE;
+					 if(Lgate.Lactual_state == GATEOPEN){
+// 							auto_close_Lgate_time = ATUO_GATE_CLOSE_TIME;
+						 auto_close_Lgate_time = Lgate.send_time*200;
+						  Lgate.state = RESERVE;
 						}else{
-								lrgate.state = RESERVE;
+								Lgate.state = RESERVE;
 						}
 								break ;	
 	default :
 								break;	
 	}	
+}
+void Rgate_Control(void)
+{
+// 	static u16 delay_time = 0;
+	switch(Rgate.state){
+	case RESERVE:	Rgate.actual_time = 0;	
+								if((auto_close_Rgate_time == 0)&&(Rgate.Ractual_state == GATEOPEN)){
+										Rgate.state = READY;
+									  Rgate.dir = GATERIGHT;
+										Rgate.action = LGCLOSE;
+								}
+								break;
+	case READY:	
+									if(Rgate.dir == GATERIGHT){
+										if(Rgate.action == LGOPEN){
+												RIGHT_GATE_OPEN;
+												Rgate.Ractual_state = GATEOPENNING;
+									}else if(Rgate.action == LGCLOSE){
+												RIGHT_GATE_CLOSE;
+												Rgate.Ractual_state = GATECLOSING;
+										}
+									}
+									Rgate.actual_time = LGGATE_TIMEOUT;
+									Rgate.state = WORKING;
+								break ;	
+	case WORKING://此处用定时器做超时处理，如果NS之后开关没有完成，则开关闸门出现故障
+								if(Rgate.actual_time == 0){
+										if(Rgate.Ractual_state == GATEOPENNING){
+												Rgate.state = END;
+											  RIGHT_GATE_RELEASE;
+												Rgate.Ractual_state = GATEERR;											
+										}
+								}	
+								break;
+
+	case END:	
+						if(Rgate.Ractual_state == GATEOPEN){
+// 							  auto_close_Rgate_time = ATUO_GATE_CLOSE_TIME;
+								auto_close_Rgate_time = Rgate.send_time * 200;
+								Rgate.state = RESERVE;
+						}else{
+								Rgate.state = RESERVE;
+						}
+								break ;	
+	default :
+								break;	
+	}	
+}
+
+void LRgate_Control(void)
+{
+	Lgate_Control();
+	Rgate_Control();
 }
 
 void LRgate_sensor_irq(void )
@@ -183,56 +233,64 @@ void LRgate_sensor_irq(void )
 	static u8 Rshiment_filter = 0;
 	static u8 Lshimen_state = 0;
 	static u8 Rshimen_state = 0;
-	if(lrgate.Lactual_state == GATEOPENNING){
+	if(Lgate.Lactual_state == GATEOPENNING){
 		 if(READ_LOPEN_SENSOR == READHIGH){
 			 LEFT_GATE_RELEASE;
-			 lrgate.Lactual_state = GATEOPEN;
-			 lrgate.state = END;
+			 Lgate.Lactual_state = GATEOPEN;
+			 Lgate.state = END;
 		}
 	}
-	if(lrgate.Lactual_state == GATECLOSING){
+	if(Lgate.Lactual_state == GATECLOSING){
 		 if(READ_LCLOSE_SENSOR == READHIGH){
-				LEFT_GATE_RELEASE;
-			 lrgate.Lactual_state = GATECLOSE;
-			 lrgate.state = END;
+			 LEFT_GATE_RELEASE;
+			 Lgate.Lactual_state = GATECLOSE;
+			 Lgate.state = END;
 		}
+		Lshimen_state =  0;
 	}
 	
-	if(lrgate.Ractual_state == GATEOPENNING){
+	if(Rgate.Ractual_state == GATEOPENNING){
 		 if(READ_ROPEN_SENSOR == READHIGH){
 				RIGHT_GATE_RELEASE;
-			  lrgate.Ractual_state = GATEOPEN;
-			  lrgate.state = END;
-			  Lshimen_state =  0;
+			  Rgate.Ractual_state = GATEOPEN;
+			  Rgate.state = END;
 		}
 	}
-	if(lrgate.Ractual_state == GATECLOSING){
+	if(Rgate.Ractual_state == GATECLOSING){
 		 if(READ_RCLOSE_SENSOR == READHIGH){
 				RIGHT_GATE_RELEASE;
-			  lrgate.Ractual_state = GATECLOSE;
-			  lrgate.state = END;
-			  Rshimen_state =  0;
+			  Rgate.Ractual_state = GATECLOSE;
+			  Rgate.state = END;
 		}
+		Rshimen_state =  0;
 	}	
 	if(READ_LEFT_SHIPMENT_SENSOR == READHIGH){
-		if((lrgate.Lactual_state == (u8)GATEOPEN)||(lrgate.Lactual_state == (u8)GATEOPENNING)){
+		if((Lgate.Lactual_state == (u8)GATEOPEN)||(Lgate.Lactual_state == (u8)GATEOPENNING)){
 			Lshiment_filter++;
-			if((Lshiment_filter >3)&&(Lshimen_state == 0)){
-				shipment_send_state = 1;
+			if((Lshiment_filter >=2)&&(Lshimen_state == 0)){
+				Lshipment_send_state = 1;
 				Lshiment_filter = 0;
 				Lshimen_state = 1;
 			}
+		}else if(Lgate.Lactual_state == (u8)GATEOPENNING){ //关门的时候有药需要处理
+
 		}
+	}else{
+		Lshiment_filter = 0;
 	}
 	if(READ_RIGHT_SHIPMENT_SENSOR == READHIGH){
-		if((lrgate.Ractual_state == (u8)GATEOPEN)||(lrgate.Ractual_state == (u8)GATEOPENNING)){
+		if((Rgate.Ractual_state == (u8)GATEOPEN)||(Rgate.Ractual_state == (u8)GATEOPENNING)){
 			Rshiment_filter++;
-			if((Rshiment_filter >3)&&(Rshimen_state == 0)){
-				shipment_send_state = 2;
+			if((Rshiment_filter >=2)&&(Rshimen_state == 0)){
+				Rshipment_send_state = 1;
 				Rshiment_filter = 0;
 				Rshimen_state = 1;
 			}
+		}else if(Rgate.Ractual_state == (u8)GATEOPENNING){
+			
 		}
+	}else{
+		Rshiment_filter = 0;
 	}
   if(auto_close_Lgate_time >0){
 		auto_close_Lgate_time--;

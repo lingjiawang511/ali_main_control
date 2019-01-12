@@ -45,8 +45,8 @@ typedef uint32	ulong;		/**< 32-bit value */
 #define RxBufMax 512
 #define TxBufMax 512
 /*自动成帧超时定时时间*/
-#define AUTO_FRAME_TIMEOUT1  10  //10*2ms
-#define AUTO_FRAME_TIMEOUT2  10  //10*2ms
+#define AUTO_FRAME_TIMEOUT1  15  //10*2ms
+#define AUTO_FRAME_TIMEOUT2  15  //10*2ms
 #define AUTO_FRAME_TIMEOUT3  10  //10*2ms
 #define AUTO_FRAME_TIMEOUT4  10  //10*2ms
 /*自动成帧超时定时时间*/
@@ -393,7 +393,8 @@ extern  Answer_Type 	 PC_Answer;
 extern  CH_Work Channel;
 extern	Belt_Work_Type belt;
 
-extern LRgate_Work_Type lrgate;
+extern LRgate_Work_Type Lgate;
+extern LRgate_Work_Type Rgate;
 extern u8 Key_ScanNum;
 extern u8 Device_State;
 extern Printer_Type Printer;
@@ -402,9 +403,12 @@ extern Air_Controlr_Type Air_Control;
 extern Control_Baffle_Type Baffle_Control;
 extern u32 uiRoll_Paper_ON_Delay;
 extern u16 baffle_err_timeout;
-extern u16 Group_Check_Time ;
+extern u16 Group1_Check_Time ;
+extern u16 Group2_Check_Time ;
 extern unsigned int sht10_read_time;
-extern u8 shipment_send_state;
+extern u8 Lshipment_send_state;
+extern u8 Rshipment_send_state;
+extern u8 Speed_Step;
 /*************extern variable end*******************/
 
 /*************function start*******************/
