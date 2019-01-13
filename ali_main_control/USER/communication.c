@@ -421,6 +421,9 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 						 }
 						 Speed_Step = 0;
 					}else if(recdata.control.colum == 0x22){//闸门控制
+						if(recdata.control.medicine_num == 0){
+								recdata.control.medicine_num = 2;
+						}
 						if(recdata.control.command == 0x10){//右闸门关
 								Lgate.dir = GATELEFT;
 								Lgate.action = LGCLOSE;

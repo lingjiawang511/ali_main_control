@@ -105,8 +105,8 @@ void LRgetout_GPIO_Config(void)
 	RIGHT_GATE_RELEASE;
 	Lgate.state = RESERVE;
 	Rgate.state = RESERVE;
-	auto_close_Rgate_time = 400;
-	auto_close_Lgate_time = 400;
+	auto_close_Rgate_time = ATUO_GATE_CLOSE_TIME;
+	auto_close_Lgate_time = ATUO_GATE_CLOSE_TIME;
 	Rgate.send_time = 2;
 	Lgate.send_time = 2;
 	Lgate.dir = GATELEFT;
@@ -117,7 +117,7 @@ void LRgetout_GPIO_Config(void)
 	Rgate.state = READY;
 }
 #define LGGATE_TIMEOUT	1000 
-#define ATUO_GATE_CLOSE_TIME	1000
+
 
 void Lgate_Control(void)
 {
@@ -290,6 +290,7 @@ void LRgate_sensor_irq(void )
 				}
 		}
 	}else{
+		Lshiment_errfilter = 0;
 		Lshiment_filter = 0;
 	}
 	if(READ_RIGHT_SHIPMENT_SENSOR == READHIGH){
@@ -310,6 +311,7 @@ void LRgate_sensor_irq(void )
 				}			
 		}
 	}else{
+		Rshiment_errfilter = 0;
 		Rshiment_filter = 0;
 	}
   if(auto_close_Lgate_time >0){
@@ -322,7 +324,7 @@ void LRgate_sensor_irq(void )
 	if(READ_GETOUT_MEDICINE_SENSOR == READLOW){
 		if(getout_state == 0){
 			getout_filter++;
-		  if(getout_filter > 20){
+		  if(getout_filter > 16){
 				if(READ_GETOUT_MEDICINE_SENSOR == READLOW){
 					send_getout_to_pc = 1;
 					getout_state = 1;
@@ -330,16 +332,18 @@ void LRgate_sensor_irq(void )
 				getout_filter = 0;
 			}
 		}
+		getout_resetfilter = 0;
 	}else{
 		if(getout_state == 1){
 			getout_resetfilter++;
-			if(getout_resetfilter > 20){
+			if(getout_resetfilter > 16){
 				if(READ_GETOUT_MEDICINE_SENSOR == READHIGH){
 					getout_state = 0;
 				}
 				getout_resetfilter = 0;
 			}
 		}
+		getout_filter = 0;
 	}
 }
 
