@@ -116,7 +116,7 @@ void LRgetout_GPIO_Config(void)
 	Rgate.action = LGOPEN;
 	Rgate.state = READY;
 }
-#define LGGATE_TIMEOUT	1000 
+#define LGGATE_TIMEOUT	2000 
 
 
 void Lgate_Control(void)
@@ -149,9 +149,9 @@ void Lgate_Control(void)
 									Lgate.actual_time = LGGATE_TIMEOUT;
 									Lgate.state = WORKING;
 								break ;	
-	case WORKING://此处用定时器做超时处理，如果NS之后开关没有完成，则开关闸门出现故障
+	case WORKING://此处用定时器做超时处理，如果10S之后开关没有完成，则开关闸门出现故障
 								if(Lgate.actual_time == 0){
-										if(Lgate.Lactual_state == GATEOPENNING){
+										if((Lgate.Lactual_state == GATEOPENNING)||(Lgate.Lactual_state == GATECLOSING)){
 												Lgate.state = END;
 											  LEFT_GATE_RELEASE;
 												Lgate.Lactual_state = GATEERR;											
@@ -196,9 +196,9 @@ void Rgate_Control(void)
 									Rgate.actual_time = LGGATE_TIMEOUT;
 									Rgate.state = WORKING;
 								break ;	
-	case WORKING://此处用定时器做超时处理，如果NS之后开关没有完成，则开关闸门出现故障
+	case WORKING://此处用定时器做超时处理，如果10S之后开关没有完成，则开关闸门出现故障
 								if(Rgate.actual_time == 0){
-										if(Rgate.Ractual_state == GATEOPENNING){
+										if((Rgate.Ractual_state == GATEOPENNING)||(Rgate.Ractual_state == GATECLOSING)){
 												Rgate.state = END;
 											  RIGHT_GATE_RELEASE;
 												Rgate.Ractual_state = GATEERR;											
@@ -286,6 +286,7 @@ void LRgate_sensor_irq(void )
 					Lshipment_send_errstate = 1;
 					Lshiment_filter = 0;
 					Lshimen_errstate = 1;
+					Lgate.Lactual_state = GATEJAM;
 					LEFT_GATE_RELEASE;
 				}
 		}
@@ -307,6 +308,7 @@ void LRgate_sensor_irq(void )
 					Rshipment_send_errstate = 1;
 					Rshiment_filter = 0;
 					Rshimen_errstate = 1;
+					Rgate.Ractual_state = GATEJAM;
 					RIGHT_GATE_RELEASE;					
 				}			
 		}
