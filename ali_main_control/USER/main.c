@@ -46,10 +46,10 @@ int main(void)
     TIM2_Config();
     TIM3_Config();
 		param_init();
-// 		IWDG_Init(128,625);    //与分频数为128,重载值为625,溢出时间为2s	
+		IWDG_Init(IWDG_Prescaler_128,625);    //与分频数为128,重载值为625,溢出时间为2s	
 		delay_ms(100);	
     while(1){
-// 			IWDG_Feed();
+			IWDG_Feed();
 			Communication_Process();
 			LRgate_Control();
 			read_TEMP_RH();	
