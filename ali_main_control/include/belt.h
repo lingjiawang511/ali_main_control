@@ -32,10 +32,11 @@
 #define BELT_SPEED3						PDout(2)
 #define BELT_DIR 							PAout(0)
 
+
 // #define BELT_ERR 							PCout(10)// PB5
 
-#define Belt_Speed(x3,x2,x1)	do{	BELT_SPEED1 = x1;BELT_SPEED1 = x2;BELT_SPEED1 = x3;}while(0)
-
+// #define Belt_Speed(x3,x2,x1)	do{	BELT_SPEED1 = x1;BELT_SPEED1 = x2;BELT_SPEED1 = x3;}while(0)
+#define Belt_Speed(x3,x2,x1)	do{	BELT_SPEED1 = !x1;BELT_SPEED1 = !x2;BELT_SPEED1 = !x3;}while(0)
 /**现场人员只允许修改这三个参数,时间只是个大概**/
 #define START_TIMEOUT		4			//软启动时间，80*5ms*2 =0.8S
 #define STOP_TIMEOUT		4			//软停止时间, 80*5ms*2 =0.8S

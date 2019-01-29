@@ -3,10 +3,10 @@
 
 #define SHT10_USE_LOW_RESOLUTION    1
 
-#define				SHT10_SCK_IO					GPIO_Pin_6 //和原理图调换一下
+#define				SHT10_SCK_IO					GPIO_Pin_7 //和原理图调换一下
 #define				SHT10_SCK_PORT			  GPIOB
 #define				SHT10_SCK_RCC					RCC_APB2Periph_GPIOB
-#define				SHT10_DATA_IO					GPIO_Pin_7
+#define				SHT10_DATA_IO					GPIO_Pin_6
 #define				SHT10_DATA_PORT				GPIOB
 #define				SHT10_DATA_RCC			  RCC_APB2Periph_GPIOB
 

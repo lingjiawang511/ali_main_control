@@ -392,7 +392,7 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 							  belt.actual_state = BELT_STOP;
 						 }else if(recdata.control.command == 0x10){
 								if(recdata.control.medicine_num == 0x00){
-										BELT_DIR = 1;
+										BELT_DIR = BELT_IO_ON;
 										belt.state = RESERVE;
 										Start_Ok = 0;
 										Belt_Speed(1,1,1);
@@ -406,7 +406,7 @@ static void resolve_host_command(u8 usart,COMM_SlaveRec_Union_Type recdata,u16 r
 								}
 						 }else if(recdata.control.command == 0x20){
 								if(recdata.control.medicine_num == 0x00){
-										BELT_DIR = 0;
+										BELT_DIR = BELT_IO_OFF;
 										belt.state = RESERVE;
 										Start_Ok = 0;
 										Belt_Speed(1,1,1);

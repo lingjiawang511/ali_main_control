@@ -39,8 +39,8 @@ u8 Send_Medicine_Finish_State;		//所有通道发药完成状态，避免发药没完成，皮带就停
 	
 	Speed_Step = 0;
 	Start_Ok = 0;
-	BELT_SPEED1 = 0;
-	BELT_DIR = 0;
+	BELT_SPEED1 = BELT_IO_OFF;
+	BELT_DIR = BELT_IO_OFF;
 	belt.state = RESERVE;
 	belt.actual_state = BELT_STOP;
 }
@@ -152,9 +152,9 @@ void Belt_Control(void)
 								break;
 	case READY:	if(Start_Ok == 0){
 		            if(belt.dir == 1){
-									BELT_DIR = 1; //此处需要由通讯控制
+									BELT_DIR = BELT_IO_ON; //此处需要由通讯控制
 								}else{
-									BELT_DIR = 0;
+									BELT_DIR = BELT_IO_OFF;
 								}
 								Speed_Step = Start_Belt(Speed_Step);	
 						   }else{
