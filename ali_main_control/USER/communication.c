@@ -992,6 +992,7 @@ void Communication_Process(void)
 				Usart4_Control_Data.rx_aframe = 0;
     }
 		Send_getout_to_pc(pc_use_usart);
+		Send_vibration_to_pc(pc_use_usart);
 		Group1_Check_State();
 		Group2_Check_State();
 }

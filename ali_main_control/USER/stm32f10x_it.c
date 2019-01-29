@@ -152,6 +152,7 @@ void TIM2_IRQHandler(void)
 		Belt_Control();
 		Key_Light_Dispose();
 		LRgate_sensor_irq();
+		Vibration_sensor_irq();
     if(Group1_Check_Time > 0){
       Group1_Check_Time--;
     }

@@ -6,7 +6,7 @@
 #define				GLED_IO					GPIO_Pin_5
 #define				GLED_PORT			  GPIOB
 #define				GLED_RCC				RCC_APB2Periph_GPIOB
-#define				RLED_IO					GPIO_Pin_13
+#define				RLED_IO					GPIO_Pin_1
 #define				RLED_PORT				GPIOC
 #define				RLED_RCC			  RCC_APB2Periph_GPIOC
 

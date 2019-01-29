@@ -37,6 +37,7 @@ int main(void)
 		Belt_Config();
 		LED_GPIO_Config();
 		LRgate_GPIO_Config();
+	  Vibration_GPIO_Config();
 	  sensor_init_sht1x();
 // 		EXTIX_Init();
     USART1_Config();

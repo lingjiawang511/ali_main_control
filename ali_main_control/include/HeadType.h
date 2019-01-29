@@ -16,7 +16,7 @@
 #include "communication.h"
 #include "baffle.h"
 #include "LGgate.h"
-
+#include "vibration.h"
 /*************Typedef datatype start*******************/
 typedef char int8;
 typedef volatile char vint8;
