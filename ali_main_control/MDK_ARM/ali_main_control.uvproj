@@ -457,6 +457,11 @@
               <FilePath>..\USER\LGgate.c</FilePath>
             </File>
             <File>
+              <FileName>vibration.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USER\vibration.c</FilePath>
+            </File>
+            <File>
               <FileName>SHT1X.lib</FileName>
               <FileType>4</FileType>
               <FilePath>..\USER\SHT1X.lib</FilePath>

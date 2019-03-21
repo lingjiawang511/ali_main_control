@@ -60,7 +60,7 @@ typedef uint32	ulong;		/**< 32-bit value */
 #define GROUP_CHECK_TIME				80		//中断软件延时时间
 #define GROUP_LINE_MAX					20
 #define GROUP_COLUM_MAX					16
-#define SOFTWARE_VERSIONS			  0X5001  //通讯小端模式，版本号大端模式，所以0x5001 = V01.50
+#define SOFTWARE_VERSIONS			  0X0002  //通讯小端模式，版本号大端模式，所以0x0002 = V02.00
 #define SHT10_READ_TIME			400   //20s钟读一次
 #define ATUO_GATE_CLOSE_TIME	400
 /*************define type end*******************/
